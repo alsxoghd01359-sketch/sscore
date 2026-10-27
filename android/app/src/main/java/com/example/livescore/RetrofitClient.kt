@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory // 추가됨
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.0.2:8080"
+    private const val BASE_URL = BuildConfig.BASE_URL
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()

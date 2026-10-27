@@ -12,8 +12,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/livescore_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplication"
-        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.SScore"
         tools:targetApi="31">
 
         <activity
@@ -41,10 +40,18 @@
             android:name=".MatchDetailActivity"
             android:exported="false" />
 
-        <activity android:name=".TeamDetailActivity"/>
-        <activity android:name=".PlayerDetailActivity" />
-        <activity android:name=".LeagueDetailActivity" />
-        <activity android:name=".SearchActivity" />
+        <activity
+            android:name=".TeamDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PlayerDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LeagueDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SearchActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
