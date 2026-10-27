@@ -14,6 +14,7 @@ data class ResendBody(val email: String)
 data class VerifyBody(val email: String, val code: String)
 data class LoginBody(val email: String, val password: String)
 data class RefreshBody(val refreshToken: String)
+data class PasswordResetConfirmBody(val email: String, val code: String, val newPassword: String)
 
 data class SignupStartedData(val email: String, val expiresInSeconds: Long, val resendAfterSeconds: Long)
 data class SignupCompletedData(val memberId: Int, val email: String, val nickname: String)
@@ -58,6 +59,15 @@ interface AuthApi {
 
     @POST("/api/auth/logout")
     suspend fun logout(@Header("Authorization") bearer: String): Response<Unit>
+
+    @POST("/api/auth/password-reset")
+    suspend fun requestPasswordReset(@Body body: ResendBody): Response<SignupStartedData>
+
+    @POST("/api/auth/password-reset/resend")
+    suspend fun resendPasswordReset(@Body body: ResendBody): Response<SignupStartedData>
+
+    @POST("/api/auth/password-reset/confirm")
+    suspend fun confirmPasswordReset(@Body body: PasswordResetConfirmBody): Response<Unit>
 }
 
 class AuthRepository(private val api: AuthApi) {
@@ -78,6 +88,15 @@ class AuthRepository(private val api: AuthApi) {
 
     suspend fun refresh(refreshToken: String): ApiResult<TokenPairData> =
         apiCall { api.refresh(RefreshBody(refreshToken)) }
+
+    suspend fun requestPasswordReset(email: String): ApiResult<SignupStartedData> =
+        apiCall { api.requestPasswordReset(ResendBody(email)) }
+
+    suspend fun resendPasswordReset(email: String): ApiResult<SignupStartedData> =
+        apiCall { api.resendPasswordReset(ResendBody(email)) }
+
+    suspend fun confirmPasswordReset(email: String, code: String, newPassword: String): ApiResult<Unit> =
+        apiCall { api.confirmPasswordReset(PasswordResetConfirmBody(email, code, newPassword)) }
 
     // 서버에 알리지 못해도(네트워크 오류 등) 이 기기의 로그인은 끝낸다 — 호출하는 쪽에서 처리
     suspend fun logout(accessToken: String): ApiResult<Unit> =

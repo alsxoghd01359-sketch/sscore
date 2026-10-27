@@ -25,6 +25,9 @@ class LoginActivity : AppCompatActivity() {
         binding.tvGoToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+        binding.tvForgotPassword.setOnClickListener {
+            startActivity(Intent(this, PasswordResetActivity::class.java))
+        }
         binding.tvBrowse.setOnClickListener { finish() }
 
         viewModel.loading.observe(this) { loading ->

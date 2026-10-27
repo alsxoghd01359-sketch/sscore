@@ -77,6 +77,17 @@ object SessionManager {
         _member.postValue(login.member)
     }
 
+    // 프로필이 바뀌었을 때 저장된 회원 정보를 갱신한다 (토큰은 그대로)
+    fun updateMember(member: MemberData) {
+        prefs?.edit()
+            ?.putInt(KEY_MEMBER_ID, member.memberId)
+            ?.putString(KEY_EMAIL, member.email)
+            ?.putString(KEY_NICKNAME, member.nickname)
+            ?.putString(KEY_ROLE, member.role)
+            ?.apply()
+        _member.postValue(member)
+    }
+
     // 토큰 갱신 결과만 반영한다 (회원 정보는 그대로)
     fun updateTokens(access: String, refresh: String) {
         accessToken = access

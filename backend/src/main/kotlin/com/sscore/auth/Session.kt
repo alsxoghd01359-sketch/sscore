@@ -58,6 +58,10 @@ interface AuthSessionRepository : JpaRepository<AuthSession, String> {
     @Modifying
     @Query("delete from AuthSession s where s.memberId = :memberId")
     fun deleteAllByMemberId(memberId: Int): Int
+
+    @Modifying
+    @Query("delete from AuthSession s where s.memberId = :memberId and s.id <> :keepId")
+    fun deleteOthersByMemberId(memberId: Int, keepId: String): Int
 }
 
 data class TokenPair(
@@ -128,6 +132,12 @@ class SessionService(
     @Transactional
     fun revokeAll(memberId: Int) {
         sessions.deleteAllByMemberId(memberId)
+    }
+
+    // 이 기기의 로그인만 남기고 나머지를 푼다 (비밀번호 변경에서 사용)
+    @Transactional
+    fun revokeOthers(memberId: Int, keepSessionId: String) {
+        sessions.deleteOthersByMemberId(memberId, keepSessionId)
     }
 
     @Transactional(readOnly = true)

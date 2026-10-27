@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.livescore.RetrofitClient
 import com.example.livescore.common.ApiResult
+import com.example.livescore.common.InputRules
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -60,8 +61,8 @@ class SignupViewModel(
 
     fun verify(codeInput: String) {
         val code = codeInput.trim()
-        if (!CODE_REGEX.matches(code)) {
-            _message.value = "6자리 숫자 인증코드를 입력해 주세요."
+        if (!InputRules.isCode(code)) {
+            _message.value = InputRules.CODE_MESSAGE
             return
         }
         launchWithLoading {
@@ -102,9 +103,9 @@ class SignupViewModel(
     fun clearMessage() { _message.value = null }
 
     private fun validate(email: String, password: String, nickname: String): String? = when {
-        !EMAIL_REGEX.matches(email) -> "올바른 이메일 형식이 아닙니다."
-        !NICKNAME_REGEX.matches(nickname) -> "닉네임은 2~12자의 한글, 영문, 숫자만 사용할 수 있습니다."
-        !PASSWORD_REGEX.matches(password) -> "비밀번호는 8~20자이며 특수문자를 포함해야 합니다."
+        !InputRules.isEmail(email) -> InputRules.EMAIL_MESSAGE
+        !InputRules.isNickname(nickname) -> InputRules.NICKNAME_MESSAGE
+        !InputRules.isPassword(password) -> InputRules.PASSWORD_MESSAGE
         else -> null
     }
 
@@ -127,11 +128,6 @@ class SignupViewModel(
     }
 
     companion object {
-        // 서버 규칙과 같다 (서버가 최종 검증)
-        private val EMAIL_REGEX = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$".toRegex()
-        private val NICKNAME_REGEX = "^[가-힣a-zA-Z0-9]{2,12}$".toRegex()
-        private val PASSWORD_REGEX = "^(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$".toRegex()
-        private val CODE_REGEX = "^\\d{6}$".toRegex()
         // 코드 만료·시도 초과는 같은 화면에서 재발송하면 되므로 처음으로 돌아가지 않는다
         private val RESTART_CODES = setOf("NO_PENDING_SIGNUP", "EMAIL_TAKEN", "NICKNAME_TAKEN")
     }

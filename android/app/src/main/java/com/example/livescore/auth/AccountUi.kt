@@ -3,10 +3,10 @@ package com.example.livescore.auth
 import android.app.Application
 import android.content.Intent
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.livescore.RetrofitClient
+import com.example.livescore.member.ProfileActivity
 import kotlinx.coroutines.launch
 
 class SScoreApp : Application() {
@@ -37,20 +37,12 @@ fun AppCompatActivity.logout() {
     }
 }
 
-// 헤더의 계정 버튼: 게스트는 로그인 화면으로, 회원은 내 정보와 로그아웃을 보여 준다.
+// 헤더의 계정 버튼: 게스트는 로그인 화면으로, 회원은 내 정보 화면으로 간다.
 fun AppCompatActivity.showAccountMenu() {
     val member = SessionManager.member.value
     if (member == null) {
         startActivity(Intent(this, LoginActivity::class.java))
         return
     }
-    AlertDialog.Builder(this)
-        .setTitle(member.nickname)
-        .setMessage(member.email)
-        .setPositiveButton("로그아웃") { _, _ ->
-            logout()
-            Toast.makeText(this, "로그아웃했습니다.", Toast.LENGTH_SHORT).show()
-        }
-        .setNegativeButton("닫기", null)
-        .show()
+    startActivity(Intent(this, ProfileActivity::class.java))
 }

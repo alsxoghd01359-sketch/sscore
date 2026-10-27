@@ -68,6 +68,15 @@
         android:indeterminateTint="@color/accent"
         android:visibility="gone"/>
 
+    <TextView
+        android:id="@+id/tvForgotPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="비밀번호를 잊으셨나요?"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"/>
+
     <!-- 회원가입 버튼 -->
     <TextView
         android:id="@+id/tvGoToRegister"

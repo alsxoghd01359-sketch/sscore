@@ -4,6 +4,7 @@ import com.example.livescore.auth.AuthApi
 import com.example.livescore.auth.AuthInterceptor
 import com.example.livescore.auth.AuthRepository
 import com.example.livescore.auth.TokenAuthenticator
+import com.example.livescore.member.MemberApi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -33,4 +34,6 @@ object RetrofitClient {
     }
 
     val apiService: ApiService by lazy { retrofit(authedClient).create(ApiService::class.java) }
+
+    val memberApi: MemberApi by lazy { retrofit(authedClient).create(MemberApi::class.java) }
 }
