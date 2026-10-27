@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#101411">
+
+        <LinearLayout
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:background="#181C19">
+
+            <TextView android:id="@+id/navMatch"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:gravity="center"
+                android:text="경기" android:textColor="#FFFFFF" android:textSize="14sp"
+                android:clickable="true" android:focusable="true"/>
+
+            <TextView android:id="@+id/navSearch"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:gravity="center"
+                android:text="검색" android:textColor="#20E07A"
+                android:textStyle="bold" android:textSize="14sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/bottomNav"
+            android:orientation="vertical">
+
+            <LinearLayout android:id="@+id/searchBar"
+                android:layout_width="match_parent" android:layout_height="84dp"
+                android:orientation="horizontal" android:gravity="bottom"
+                android:paddingHorizontal="12dp" android:paddingBottom="10dp"
+                android:background="#1A1A1A">
+
+                <ImageView android:id="@+id/btnBack"
+                    android:layout_width="40dp" android:layout_height="40dp"
+                    android:src="@drawable/ic_arrow_back" android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:tint="#FFFFFF"/>
+
+                <EditText android:id="@+id/etSearch"
+                    android:layout_width="0dp" android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="@drawable/edittext_bg"
+                    android:paddingHorizontal="14dp"
+                    android:hint="선수, 구단, 리그 검색"
+                    android:textColor="#FFFFFF" android:textColorHint="#555555"
+                    android:textSize="15sp" android:imeOptions="actionSearch"
+                    android:inputType="text" android:singleLine="true"/>
+
+                <ImageView android:id="@+id/btnClear"
+                    android:layout_width="36dp" android:layout_height="36dp"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:padding="6dp" android:visibility="gone"
+                    android:clickable="true" android:focusable="true"/>
+            </LinearLayout>
+
+            <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
+                android:layout_weight="1">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvResults"
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:clipToPadding="false" android:paddingTop="4dp"
+                    android:visibility="gone"/>
+                <View android:id="@+id/tvEmpty"
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:visibility="gone"/>
+            </FrameLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+</layout>

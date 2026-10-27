@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="6dp">
+
+    <!-- 결과 박스 (W=초록, D=회색, L=빨강) + 스코어 -->
+    <TextView
+        android:id="@+id/tvResultBox"
+        android:layout_width="48dp"
+        android:layout_height="32dp"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:text="2-1" />
+
+    <!-- 상대팀 로고 -->
+    <ImageView
+        android:id="@+id/ivOpponentLogo"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="6dp" />
+
+</LinearLayout>

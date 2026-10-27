@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DateItemStyle">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:background">@drawable/date_bg</item>
+    </style>
+
+    <style name="DateItemSelectedStyle">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:background">@drawable/date_selected_bg</item>
+    </style>
+
+</resources>

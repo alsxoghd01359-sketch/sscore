@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MOM 평점 뱃지용 둥근 모서리 배경 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- 앱의 포인트 컬러인 네온 그린 색상 지정 -->
+    <solid android:color="#20E07A" />
+
+    <!-- 모서리 둥글기 적용 -->
+    <corners android:radius="6dp" />
+</shape>

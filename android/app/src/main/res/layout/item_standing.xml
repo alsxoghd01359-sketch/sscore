@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="54dp"
+    android:orientation="horizontal"
+    android:paddingHorizontal="8dp"
+    android:background="#101411"
+    android:gravity="center_vertical">
+
+    <!-- # 순위 -->
+    <TextView
+        android:id="@+id/tvRank"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:gravity="center"
+        android:textColor="#888888"
+        android:textSize="13sp" />
+
+    <!-- 팀 로고 -->
+    <ImageView
+        android:id="@+id/ivTeamLogo"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginEnd="6dp" />
+
+    <!-- 팀 이름: 최대 2줄, 고정 행 높이 안에서 중앙 정렬 -->
+    <TextView
+        android:id="@+id/tvTeam"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2.0"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:maxLines="2"
+        android:lineSpacingMultiplier="1.1" />
+
+    <!-- 경기 수 -->
+    <TextView
+        android:id="@+id/tvPlayed"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.45"
+        android:gravity="center"
+        android:textColor="#CCCCCC"
+        android:textSize="12sp" />
+
+    <!-- 승 -->
+    <TextView
+        android:id="@+id/tvWin"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:gravity="center"
+        android:textColor="#CCCCCC"
+        android:textSize="12sp" />
+
+    <!-- 무 -->
+    <TextView
+        android:id="@+id/tvDraw"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:gravity="center"
+        android:textColor="#CCCCCC"
+        android:textSize="12sp" />
+
+    <!-- 패 -->
+    <TextView
+        android:id="@+id/tvLose"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:gravity="center"
+        android:textColor="#CCCCCC"
+        android:textSize="12sp" />
+
+    <!-- 득점-실점 (+/-) -->
+    <TextView
+        android:id="@+id/tvGoals"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.1"
+        android:gravity="center"
+        android:textColor="#CCCCCC"
+        android:textSize="12sp" />
+
+    <!-- 득실차 (=) -->
+    <TextView
+        android:id="@+id/tvGoalDiff"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.65"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <!-- 승점 -->
+    <TextView
+        android:id="@+id/tvPoints"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.55"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

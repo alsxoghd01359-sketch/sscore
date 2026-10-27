@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="115dp">
+
+    <!-- 교체 정보: 상단 고정, 가로폭 자유(전체 텍스트 출력), 레이아웃 흐름에 영향 없음 -->
+    <TextView
+        android:id="@+id/tvSubstInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="#FFB347"
+        android:textSize="12sp"
+        android:singleLine="true"
+        android:visibility="invisible" />
+
+    <!-- 선수 사진: marginTop 22dp 고정 → 교체 텍스트·이름 줄 수와 완전 무관 -->
+    <ImageView
+        android:id="@+id/ivPlayerPhoto"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="22dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/bg_player_circle"
+        android:scaleType="centerCrop" />
+
+    <!-- 선수 이름: 사진 바로 아래, 최대 2줄 -->
+    <TextView
+        android:id="@+id/tvPlayerName"
+        android:layout_width="62dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ivPlayerPhoto"
+        android:layout_marginTop="2dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:background="#99000000"
+        android:paddingHorizontal="3dp"
+        android:paddingVertical="2dp"
+        android:gravity="center"
+        android:maxLines="3"
+        android:lineSpacingMultiplier="0.95" />
+
+</RelativeLayout>
