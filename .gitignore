@@ -9,3 +9,6 @@ local.properties
 
 # 비밀값
 .env
+
+# DB 데이터 덤프 (GitHub에 올리지 않음)
+db/data/
