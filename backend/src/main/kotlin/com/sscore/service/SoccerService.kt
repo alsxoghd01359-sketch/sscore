@@ -794,22 +794,6 @@ class SoccerService(
         )
     }
 
-    fun getTeamNameById(teamId: Int): String? =
-        teamRepository.findById(teamId).orElse(null)?.name
-
-    // DB에 실제로 뭐가 있는지 확인용 (teamName 매핑 검증)
-    data class PlayerStatDebug(
-        val playerId: Long, val playerName: String,
-        val appearances: Int, val teamName: String
-    )
-    fun debugPlayerStats(teamId: Int, season: Int): List<PlayerStatDebug> {
-        val teamName = teamRepository.findById(teamId).orElse(null)?.name ?: return emptyList()
-        return playerSeasonStatRepository.findBySeasonAndTeamName(season, teamName).map {
-            val name = playerRepository.findById(it.playerId).orElse(null)?.name ?: "unknown"
-            PlayerStatDebug(it.playerId, name, it.appearances, it.teamName)
-        }
-    }
-
     fun getTeamStats(teamId: Int, leagueId: Int, season: Int): TeamStatsDto {
         // 홈/원정 성적
         val (home, away) = apiService.fetchTeamRecord(teamId, leagueId, season)

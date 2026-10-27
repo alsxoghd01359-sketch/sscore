@@ -19,7 +19,7 @@ import org.springframework.security.web.SecurityFilterChain
 @Configuration
 class SecurityConfig {
 
-    // 조회 기능은 게스트도 쓸 수 있다. 개인화 기능과 관리 기능만 로그인이 필요하다.
+    // 조회 기능은 게스트도 쓸 수 있다. 개인화 기능은 로그인이, 관리 기능(/api/admin/**)은 ADMIN 권한이 필요하다.
     @Bean
     fun filterChain(
         http: HttpSecurity,
@@ -36,9 +36,17 @@ class SecurityConfig {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
+                it.requestMatchers("/api/admin/**").hasRole("ADMIN")
                 it.anyRequest().permitAll()
             }
-            .exceptionHandling { it.authenticationEntryPoint(entryPoint) }
+            .exceptionHandling {
+                it.authenticationEntryPoint(entryPoint)
+                it.accessDeniedHandler { _, response, _ ->
+                    response.status = HttpStatus.FORBIDDEN.value()
+                    response.contentType = "${MediaType.APPLICATION_JSON_VALUE};charset=UTF-8"
+                    response.writer.write("""{"code":"FORBIDDEN","message":"권한이 없습니다."}""")
+                }
+            }
             .oauth2ResourceServer { rs ->
                 rs.authenticationEntryPoint(entryPoint)
                 rs.jwt { it.jwtAuthenticationConverter(sessionAwareConverter(sessions)) }

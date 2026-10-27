@@ -1,5 +1,6 @@
 package com.sscore.auth
 
+import com.sscore.admin.AdminAccounts
 import com.sscore.common.ApiException
 import com.sscore.member.Member
 import com.sscore.member.MemberRepository
@@ -20,6 +21,7 @@ class SignupService(
     private val members: MemberRepository,
     private val verifications: SignupVerificationRepository,
     private val mail: MailPort,
+    private val adminAccounts: AdminAccounts,
     private val passwordEncoder: PasswordEncoder,
     private val clock: Clock
 ) {
@@ -128,7 +130,10 @@ class SignupService(
             throw ApiException(HttpStatus.CONFLICT, "NICKNAME_TAKEN", "이미 사용 중인 닉네임입니다.")
         }
         val member = members.save(
-            Member(email = email, password = pending.passwordHash, nickname = pending.nickname, createdAt = now)
+            Member(
+                email = email, password = pending.passwordHash, nickname = pending.nickname,
+                role = adminAccounts.roleFor(email), createdAt = now
+            )
         )
         verifications.delete(pending)
         return SignupCompleted(member.userId!!, member.email, member.nickname)
