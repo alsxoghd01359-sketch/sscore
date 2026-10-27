@@ -4,10 +4,11 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-// 서버 주소: local.properties의 server.url(디버그) / server.url.release(릴리스)로 바꿀 수 있다.
+// 서버 주소: android/server.properties의 server.url(디버그) / server.url.release(릴리스)로 바꿀 수 있다.
+// (local.properties는 Android Studio가 다시 써서 지워질 수 있어 쓰지 않는다)
 // 기본값: 디버그는 에뮬레이터에서 PC로 가는 주소(10.0.2.2). 실기기는 server.url에 PC의 IP를 적는다.
 val localProps = Properties().apply {
-    val f = rootProject.file("local.properties")
+    val f = rootProject.file("server.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
 fun serverUrl(key: String, default: String): String =

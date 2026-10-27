@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# 개발 PC별 서버 주소 설정
+server.properties
