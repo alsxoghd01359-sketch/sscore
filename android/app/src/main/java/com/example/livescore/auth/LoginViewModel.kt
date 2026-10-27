@@ -21,26 +21,54 @@ class LoginViewModel(
     private val _loggedIn = MutableLiveData(false)
     val loggedIn: LiveData<Boolean> = _loggedIn
 
+    // 탈퇴 유예 중인 계정으로 로그인했을 때의 안내 문구. 화면이 탈퇴 취소를 물어본 뒤 consume한다.
+    private val _withdrawnPrompt = MutableLiveData<String?>(null)
+    val withdrawnPrompt: LiveData<String?> = _withdrawnPrompt
+
+    private var lastEmail = ""
+    private var lastPassword = ""
+
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isEmpty()) {
             _message.value = "이메일과 비밀번호를 입력해 주세요."
             return
         }
+        lastEmail = email.trim()
+        lastPassword = password
+        launchWithLoading {
+            when (val r = repository.login(lastEmail, lastPassword)) {
+                is ApiResult.Success -> onLoggedIn(r.data)
+                is ApiResult.Failure ->
+                    if (r.code == "ACCOUNT_WITHDRAWN") _withdrawnPrompt.value = r.message else _message.value = r.message
+            }
+        }
+    }
+
+    // 방금 입력한 이메일·비밀번호로 탈퇴를 취소하고 로그인한다
+    fun restoreAccount() {
+        launchWithLoading {
+            when (val r = repository.restore(lastEmail, lastPassword)) {
+                is ApiResult.Success -> onLoggedIn(r.data)
+                is ApiResult.Failure -> _message.value = r.message
+            }
+        }
+    }
+
+    fun consumeWithdrawnPrompt() {
+        _withdrawnPrompt.value = null
+    }
+
+    private fun onLoggedIn(data: LoginResponseData) {
+        SessionManager.save(data)
+        _loggedIn.value = true
+    }
+
+    private fun launchWithLoading(block: suspend () -> Unit) {
         if (_loading.value == true) return
         _loading.value = true
         _message.value = null
         viewModelScope.launch {
-            try {
-                when (val r = repository.login(email.trim(), password)) {
-                    is ApiResult.Success -> {
-                        SessionManager.save(r.data)
-                        _loggedIn.value = true
-                    }
-                    is ApiResult.Failure -> _message.value = r.message
-                }
-            } finally {
-                _loading.value = false
-            }
+            try { block() } finally { _loading.value = false }
         }
     }
 }

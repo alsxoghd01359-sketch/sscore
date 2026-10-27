@@ -2,6 +2,7 @@ package com.sscore.auth
 
 import com.sscore.common.ApiException
 import com.sscore.member.MemberRepository
+import com.sscore.member.MemberStatus
 import com.sscore.member.MemberRules
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -54,6 +55,7 @@ class PasswordReset(
 @Repository
 interface PasswordResetRepository : JpaRepository<PasswordReset, Long> {
     fun findByEmail(email: String): PasswordReset?
+    fun deleteByEmail(email: String): Long
 }
 
 data class PasswordResetRequest(val email: String? = null)
@@ -74,7 +76,9 @@ class PasswordResetService(
     @Transactional
     fun start(request: PasswordResetRequest): SignupStarted {
         val email = MemberRules.normalizeEmail(request.email)
-        if (!members.existsByEmail(email)) return started(email)
+        // 탈퇴 유예 중인 회원도 가입하지 않은 이메일처럼 다룬다(메일을 보내지 않는다)
+        val member = members.findByEmail(email)
+        if (member == null || member.status != MemberStatus.ACTIVE) return started(email)
 
         val now = LocalDateTime.now(clock)
         val code = VerificationRules.newCode()
@@ -131,7 +135,7 @@ class PasswordResetService(
             throw VerificationRules.mismatch(pending.failedAttempts)
         }
 
-        val member = members.findByEmail(email) ?: throw noPending()
+        val member = members.findByEmail(email)?.takeIf { it.status == MemberStatus.ACTIVE } ?: throw noPending()
         member.password = passwordEncoder.encode(newPassword)!!
         resets.delete(pending)
         sessions.revokeAll(member.userId!!)

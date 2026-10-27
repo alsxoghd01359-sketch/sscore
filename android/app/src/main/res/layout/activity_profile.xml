@@ -165,6 +165,14 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+        <TextView
+            android:id="@+id/tvWithdrawNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
         <Button
             android:id="@+id/btnLogout"
             style="?android:attr/borderlessButtonStyle"
@@ -172,6 +180,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="로그아웃"
+            android:textColor="@color/text_body" />
+
+        <Button
+            android:id="@+id/btnWithdraw"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="회원 탈퇴"
             android:textColor="@color/negative" />
     </LinearLayout>
 </ScrollView>

@@ -54,6 +54,9 @@ interface AuthApi {
     @POST("/api/auth/login")
     suspend fun login(@Body body: LoginBody): Response<LoginResponseData>
 
+    @POST("/api/auth/restore")
+    suspend fun restore(@Body body: LoginBody): Response<LoginResponseData>
+
     @POST("/api/auth/refresh")
     suspend fun refresh(@Body body: RefreshBody): Response<TokenPairData>
 
@@ -85,6 +88,9 @@ class AuthRepository(private val api: AuthApi) {
 
     suspend fun login(email: String, password: String): ApiResult<LoginResponseData> =
         apiCall { api.login(LoginBody(email, password)) }
+
+    suspend fun restore(email: String, password: String): ApiResult<LoginResponseData> =
+        apiCall { api.restore(LoginBody(email, password)) }
 
     suspend fun refresh(refreshToken: String): ApiResult<TokenPairData> =
         apiCall { api.refresh(RefreshBody(refreshToken)) }

@@ -5,6 +5,9 @@ import com.sscore.common.ApiException
 import com.sscore.member.Member
 import com.sscore.member.MemberRepository
 import com.sscore.member.MemberRules
+import com.sscore.member.MemberStatus
+import com.sscore.member.WithdrawalPolicy
+import com.sscore.member.WithdrawalService
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -18,6 +21,7 @@ class SignupService(
     private val members: MemberRepository,
     private val verifications: SignupVerificationRepository,
     private val mailer: CodeMailer,
+    private val withdrawals: WithdrawalService,
     private val adminAccounts: AdminAccounts,
     private val passwordEncoder: PasswordEncoder,
     private val clock: Clock
@@ -30,7 +34,15 @@ class SignupService(
         MemberRules.requirePassword(password)
         MemberRules.requireNickname(nickname)
 
-        if (members.existsByEmail(email)) {
+        // 탈퇴 유예가 끝난 같은 이메일의 회원이 남아 있으면 먼저 정리한다
+        withdrawals.purgeIfExpired(email)
+        members.findByEmail(email)?.let { existing ->
+            if (existing.status == MemberStatus.WITHDRAWN) {
+                throw ApiException(
+                    HttpStatus.CONFLICT, "ACCOUNT_WITHDRAWN",
+                    "탈퇴 처리 중인 계정입니다. 로그인해서 탈퇴를 취소하거나, ${WithdrawalPolicy.deadlineText(existing)} 이후에 다시 가입해 주세요."
+                )
+            }
             throw ApiException(HttpStatus.CONFLICT, "EMAIL_TAKEN", "이미 가입된 이메일입니다.")
         }
         if (members.existsByNickname(nickname)) {

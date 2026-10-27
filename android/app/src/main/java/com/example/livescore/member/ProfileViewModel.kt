@@ -30,6 +30,30 @@ class ProfileViewModel(
     private val _passwordChanged = MutableLiveData(false)
     val passwordChanged: LiveData<Boolean> = _passwordChanged
 
+    private val _withdrawNotice = MutableLiveData<Notice?>(null)
+    val withdrawNotice: LiveData<Notice?> = _withdrawNotice
+
+    // 탈퇴 요청이 받아들여지면 true. 화면은 안내 후 닫는다.
+    private val _withdrawn = MutableLiveData(false)
+    val withdrawn: LiveData<Boolean> = _withdrawn
+
+    fun withdraw(password: String) {
+        if (password.isEmpty()) {
+            _withdrawNotice.value = Notice("비밀번호를 입력해 주세요.", true)
+            return
+        }
+        launchWithLoading {
+            when (val r = repository.withdraw(password)) {
+                is ApiResult.Success -> {
+                    // 서버가 모든 기기의 로그인을 풀었으므로 이 기기도 게스트로 돌아간다
+                    SessionManager.clear()
+                    _withdrawn.value = true
+                }
+                is ApiResult.Failure -> _withdrawNotice.value = Notice(r.message, true)
+            }
+        }
+    }
+
     fun changeNickname(input: String) {
         val nickname = input.trim()
         if (!InputRules.isNickname(nickname)) {

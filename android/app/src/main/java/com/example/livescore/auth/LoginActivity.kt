@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.livescore.databinding.ActivityLoginBinding
 
@@ -37,6 +38,17 @@ class LoginActivity : AppCompatActivity() {
         viewModel.message.observe(this) { message ->
             binding.tvMessage.text = message.orEmpty()
             binding.tvMessage.visibility = if (message.isNullOrEmpty()) View.GONE else View.VISIBLE
+        }
+        viewModel.withdrawnPrompt.observe(this) { prompt ->
+            if (prompt != null) {
+                AlertDialog.Builder(this)
+                    .setTitle("탈퇴 처리 중인 계정")
+                    .setMessage("$prompt\n\n탈퇴를 취소하고 로그인할까요?")
+                    .setPositiveButton("탈퇴 취소하고 로그인") { _, _ -> viewModel.restoreAccount() }
+                    .setNegativeButton("닫기", null)
+                    .setOnDismissListener { viewModel.consumeWithdrawnPrompt() }
+                    .show()
+            }
         }
         viewModel.loggedIn.observe(this) { loggedIn ->
             if (loggedIn) {

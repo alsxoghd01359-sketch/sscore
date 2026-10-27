@@ -14,7 +14,8 @@ import java.time.LocalDateTime
 
 enum class MemberRole { USER, ADMIN }
 
-enum class MemberStatus { ACTIVE }
+// WITHDRAWN: 탈퇴를 요청하고 30일 유예 중인 회원. 로그인할 수 없고 유예 안에는 복구할 수 있다.
+enum class MemberStatus { ACTIVE, WITHDRAWN }
 
 // 이메일 인증을 마친 회원
 @Entity
@@ -40,7 +41,10 @@ class Member(
     @Column(nullable = false, length = 20)
     var status: MemberStatus = MemberStatus.ACTIVE,
 
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime,
+
+    @Column(name = "withdrawn_at")
+    var withdrawnAt: LocalDateTime? = null
 )
 
 @Repository
@@ -48,4 +52,5 @@ interface MemberRepository : JpaRepository<Member, Int> {
     fun findByEmail(email: String): Member?
     fun existsByEmail(email: String): Boolean
     fun existsByNickname(nickname: String): Boolean
+    fun findByStatusAndWithdrawnAtBefore(status: MemberStatus, cutoff: LocalDateTime): List<Member>
 }

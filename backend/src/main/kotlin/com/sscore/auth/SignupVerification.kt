@@ -48,4 +48,5 @@ class SignupVerification(
 @Repository
 interface SignupVerificationRepository : JpaRepository<SignupVerification, Long> {
     fun findByEmail(email: String): SignupVerification?
+    fun deleteByEmail(email: String): Long
 }
