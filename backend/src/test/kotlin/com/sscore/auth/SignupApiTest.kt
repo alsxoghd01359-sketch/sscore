@@ -78,10 +78,10 @@ class SignupApiTest : ApiTest() {
     @Test
     fun `인증 전에는 로그인할 수 없다`() {
         signup()
-        mockMvc.post("/api/user/login") {
+        mockMvc.post("/api/auth/login") {
             contentType = MediaType.APPLICATION_JSON
             content = json("email" to email, "password" to password)
-        }.andExpect { content { string("실패") } }
+        }.andExpect { status { isUnauthorized() } }
     }
 
     @Test

@@ -21,6 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:hint="Email"
+        android:inputType="textEmailAddress"
         android:textColor="@color/text_primary"
         android:textColorHint="@color/text_hint"
         android:background="@drawable/edittext_bg"
@@ -49,14 +50,41 @@
         android:textColor="@color/on_accent"
         android:backgroundTint="@color/accent"/>
 
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:textColor="@color/negative"
+        android:textSize="13sp"
+        android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:indeterminateTint="@color/accent"
+        android:visibility="gone"/>
+
     <!-- 회원가입 버튼 -->
     <TextView
         android:id="@+id/tvGoToRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="회원가입"
-        android:textColor="@color/text_hint"
+        android:textColor="@color/text_secondary"
         android:layout_marginTop="16dp"
+        android:padding="8dp"/>
+
+    <!-- 로그인 없이 계속 -->
+    <TextView
+        android:id="@+id/tvBrowse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="로그인 없이 둘러보기"
+        android:textColor="@color/text_hint"
         android:padding="8dp"/>
 
 </LinearLayout>

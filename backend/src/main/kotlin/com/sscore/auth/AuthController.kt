@@ -1,6 +1,5 @@
 package com.sscore.auth
 
-import com.sscore.member.MemberRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -39,19 +38,4 @@ class SignupController(private val signup: SignupService) {
     @GetMapping("/nickname-available")
     fun nicknameAvailable(@RequestParam nickname: String?): NicknameAvailability =
         signup.nicknameAvailability(nickname)
-}
-
-// 로그인은 04번 티켓(JWT)에서 교체한다. 그때까지 기존 앱이 쓰던 응답 형태를 그대로 둔다.
-@RestController
-@RequestMapping("/api/user")
-class LegacyLoginController(
-    private val members: MemberRepository,
-    private val passwordEncoder: PasswordEncoder
-) {
-    @PostMapping("/login")
-    fun login(@RequestBody loginData: Map<String, String>): String {
-        val member = members.findByEmail(loginData["email"].orEmpty().trim().lowercase())
-        val ok = member != null && passwordEncoder.matches(loginData["password"].orEmpty(), member.password)
-        return if (ok) "성공" else "실패"
-    }
 }

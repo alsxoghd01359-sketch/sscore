@@ -32,9 +32,6 @@ interface ApiService {
         @Query("awayId") awayId: Int
     ): Call<H2HSummaryData>
 
-    @POST("/api/user/login")
-    fun login(@Body loginData: Map<String, String>): Call<String>
-
     @GET("/api/soccer/matches/{fixtureId}/info")
     fun getMatchInfo(@Path("fixtureId") fixtureId: Long): Call<MatchInfoData>
 

@@ -69,6 +69,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

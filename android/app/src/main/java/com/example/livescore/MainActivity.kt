@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
+import com.example.livescore.auth.SessionManager
+import com.example.livescore.auth.showAccountMenu
 import com.example.livescore.databinding.ActivityMainBinding
 import retrofit2.Call
 import retrofit2.Callback
@@ -40,8 +42,23 @@ class MainActivity : AppCompatActivity() {
         setupLeagueTabs()
         setupCalendar()
         updateCalendarButtonText()
+        setupAccount()
 
         loadMatchesForDate()   // 오늘 날짜로 첫 로드
+    }
+
+    // 헤더 계정 버튼: 게스트는 "로그인", 회원은 닉네임을 보여 준다
+    private fun setupAccount() {
+        binding.btnAccount.setOnClickListener { showAccountMenu() }
+        SessionManager.member.observe(this) { member ->
+            binding.btnAccount.text = member?.nickname ?: "로그인"
+        }
+        SessionManager.expired.observe(this) { expired ->
+            if (expired) {
+                Toast.makeText(this, "로그인이 만료되었습니다. 다시 로그인해 주세요.", Toast.LENGTH_LONG).show()
+                SessionManager.consumeExpired()
+            }
+        }
     }
 
     private fun updateCalendarButtonText() {

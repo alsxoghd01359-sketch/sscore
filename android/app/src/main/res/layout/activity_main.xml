@@ -28,6 +28,21 @@
                 <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
 
                 <TextView
+                    android:id="@+id/btnAccount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="로그인"
+                    android:textColor="@color/accent"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="10dp"
+                    android:maxWidth="120dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
                     android:id="@+id/btnCalendar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -16,15 +16,8 @@ class SplashActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
 
-            // 로그인 여부 확인 (임시 false)
-            val isLoggedIn = false
-
-            if (isLoggedIn) {
-                startActivity(Intent(this, MainActivity::class.java))
-            } else {
-                startActivity(Intent(this, LoginActivity::class.java))
-            }
-
+            // 로그인 여부와 관계없이 메인으로 간다. 저장된 로그인이 없으면 게스트로 시작한다.
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
 
         }, SPLASH_DELAY)
