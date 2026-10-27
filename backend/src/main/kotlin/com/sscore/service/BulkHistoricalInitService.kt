@@ -1,7 +1,9 @@
 package com.sscore.service
 
+import com.sscore.common.ApiException
 import com.sscore.repository.TeamRepository
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 /**
@@ -64,7 +66,7 @@ class BulkHistoricalInitService(
                     currentStatus = "팀 동기화 중: $leagueName $season 시즌 (${progress + 1}/$total)"
                     runCatching { apiService.syncTeams(leagueId, season) }
                         .onSuccess { successCount++ }
-                        .onFailure { errorCount++; log.error("팀 sync 실패 league={} season={}", leagueId, season) }
+                        .onFailure { errorCount++; log.error("팀 sync 실패 league={} season={}", leagueId, season, it) }
                     progress++
                     Thread.sleep(delayMs)
 
@@ -74,7 +76,7 @@ class BulkHistoricalInitService(
                     currentStatus = "경기 동기화 중: $leagueName $season 시즌 (${progress + 1}/$total)"
                     runCatching { apiService.syncFixtures(leagueId, season) }
                         .onSuccess { successCount++ }
-                        .onFailure { errorCount++; log.error("경기 sync 실패 league={} season={}", leagueId, season) }
+                        .onFailure { errorCount++; log.error("경기 sync 실패 league={} season={}", leagueId, season, it) }
                     progress++
                     Thread.sleep(delayMs)
                 }
@@ -112,7 +114,7 @@ class BulkHistoricalInitService(
                     currentStatus = "${team.name} 선수 동기화 중 ($season 시즌) (${progress + 1}/$total)"
                     runCatching { apiService.syncPlayers(team.teamId, season) }
                         .onSuccess { successCount++ }
-                        .onFailure { errorCount++ }
+                        .onFailure { errorCount++; log.error("선수 sync 실패 team={} season={}", team.teamId, season, it) }
                     progress++
                     Thread.sleep(delayMs)
                 }
@@ -163,7 +165,7 @@ class BulkHistoricalInitService(
     // 내부 헬퍼
     // ─────────────────────────────────────────────────────────────────────
     private fun checkNotRunning() {
-        if (isRunning) throw IllegalStateException("이미 적재 작업이 실행 중입니다. /admin/import/status 로 확인하세요.")
+        if (isRunning) throw ApiException(HttpStatus.CONFLICT, "IMPORT_RUNNING", "이미 적재 작업이 실행 중입니다. GET /api/admin/import/status 로 확인하세요.")
     }
 
     private fun resetCounters() {

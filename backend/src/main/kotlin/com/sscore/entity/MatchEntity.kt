@@ -58,7 +58,6 @@ data class MatchEntity(
     @get:JsonProperty("season")
     val season: Int,
 
-    // 🌟 이 부분이 빠져 있어서 SoccerService에서 컴파일 에러가 발생했습니다!
     @Column(name = "referee")
     @get:JsonProperty("referee")
     val referee: String? = null

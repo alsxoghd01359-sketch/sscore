@@ -2,13 +2,15 @@ package com.sscore.controller
 
 import com.sscore.entity.PlayerSeasonStatEntity
 import com.sscore.dto.*
+import com.sscore.football.SeasonResolver
 import com.sscore.service.SoccerService
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/soccer")
 class SoccerController(
-    private val soccerService: SoccerService
+    private val soccerService: SoccerService,
+    private val seasons: SeasonResolver
 ) {
 
     // 1. 전체 경기 데이터 DB에서 가져오기
@@ -37,8 +39,8 @@ class SoccerController(
     }
 
     @GetMapping("/standings")
-    fun getStandings(@RequestParam leagueId: Int, @RequestParam season: Int) =
-        soccerService.getStandings(leagueId, season)
+    fun getStandings(@RequestParam leagueId: Int, @RequestParam(required = false) season: Int?) =
+        soccerService.getStandings(leagueId, seasons.resolve(season))
 
     @GetMapping("/h2h")
     fun getH2H(@RequestParam homeId: Int, @RequestParam awayId: Int) =
@@ -63,22 +65,22 @@ class SoccerController(
     @GetMapping("/league/{leagueId}/player-stats")
     fun getLeaguePlayerStats(
         @PathVariable leagueId: Int,
-        @RequestParam(defaultValue = "2025") season: Int
-    ): LeaguePlayerStatsDto = soccerService.getLeaguePlayerStats(leagueId, season)
+        @RequestParam(required = false) season: Int?
+    ): LeaguePlayerStatsDto = soccerService.getLeaguePlayerStats(leagueId, seasons.resolve(season))
 
     /** 리그 팀 통계 (평균평점/득점/실점/클린시트) */
     @GetMapping("/league/{leagueId}/team-stats")
     fun getLeagueTeamStats(
         @PathVariable leagueId: Int,
-        @RequestParam(defaultValue = "2025") season: Int
-    ): LeagueTeamStatsDto = soccerService.getLeagueTeamStats(leagueId, season)
+        @RequestParam(required = false) season: Int?
+    ): LeagueTeamStatsDto = soccerService.getLeagueTeamStats(leagueId, seasons.resolve(season))
 
     /** 리그 경기 일정/결과 (날짜별 그룹) */
     @GetMapping("/league/{leagueId}/matches")
     fun getLeagueMatches(
         @PathVariable leagueId: Int,
-        @RequestParam(defaultValue = "2025") season: Int
-    ): List<LeagueMatchDayDto> = soccerService.getLeagueMatches(leagueId, season)
+        @RequestParam(required = false) season: Int?
+    ): List<LeagueMatchDayDto> = soccerService.getLeagueMatches(leagueId, seasons.resolve(season))
 
     /** 선수 경기 기록 */
     @GetMapping("/player/{playerId}/matches")
@@ -122,8 +124,8 @@ class SoccerController(
     fun getTeamStats(
         @PathVariable teamId:  Int,
         @RequestParam leagueId: Int,
-        @RequestParam season:   Int
-    ): TeamStatsDto = soccerService.getTeamStats(teamId, leagueId, season)
+        @RequestParam(required = false) season: Int?
+    ): TeamStatsDto = soccerService.getTeamStats(teamId, leagueId, seasons.resolve(season))
 
     /** 구단 경기 목록 (페이지네이션, 최신순) */
     @GetMapping("/team/{teamId}/matches")
@@ -138,6 +140,6 @@ class SoccerController(
     fun getTeamOverview(
         @PathVariable teamId: Int,
         @RequestParam leagueId: Int,
-        @RequestParam season: Int
-    ): TeamOverviewDto = soccerService.getTeamOverview(teamId, leagueId, season)
+        @RequestParam(required = false) season: Int?
+    ): TeamOverviewDto = soccerService.getTeamOverview(teamId, leagueId, seasons.resolve(season))
 }

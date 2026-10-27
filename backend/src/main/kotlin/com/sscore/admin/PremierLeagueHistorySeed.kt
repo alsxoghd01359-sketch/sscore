@@ -1,4 +1,4 @@
-package com.sscore.service
+package com.sscore.admin
 
 import com.sscore.entity.ChampionEntity
 import com.sscore.repository.ChampionRepository

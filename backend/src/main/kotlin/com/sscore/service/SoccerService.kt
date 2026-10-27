@@ -12,14 +12,14 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.client.RestTemplate
 import java.time.ZonedDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.sscore.football.SeasonResolver
+import com.sscore.common.ApiException
 
 @Service
 class SoccerService(
-    private val restTemplate: RestTemplate,
     private val matchRepository: MatchRepository,
     private val matchEventRepository: MatchEventRepository,
     private val playerStatRepository: PlayerStatRepository,
@@ -28,7 +28,8 @@ class SoccerService(
     private val championRepository: ChampionRepository,
     private val leagueRepository: LeagueRepository,
     private val teamRepository: TeamRepository,
-    private val playerRepository: PlayerRepository
+    private val playerRepository: PlayerRepository,
+    private val seasons: SeasonResolver
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -78,38 +79,43 @@ class SoccerService(
         referee    = referee
     )
 
-    @Transactional
+    // 시즌별로 외부 API에서 받은 경기를 저장한다. 외부 API 오류가 나면 그 시즌부터 중단하고 오류를 그대로 올린다(앞 시즌 저장분은 유지).
     fun saveSeasonsRange(start: Int, end: Int) {
         for (season in start..end) {
-            try {
-                val matchDtos = apiService.fetchMatchesBySeason(season)
-                if (matchDtos.isEmpty()) continue
+            val matchDtos = apiService.fetchMatchesBySeason(season)
+            if (matchDtos.isEmpty()) continue
 
-                val entities = matchDtos.map { dto ->
-                    val existing = matchRepository.findByFixtureId(dto.fixtureId!!)
-                    MatchEntity(
-                        id = existing?.id,
-                        fixtureId = dto.fixtureId,
-                        homeTeam = dto.homeTeam,
-                        awayTeam = dto.awayTeam,
-                        homeTeamId = dto.homeTeamId,
-                        awayTeamId = dto.awayTeamId,
-                        matchDate = dto.matchDate,
-                        matchTime = dto.matchTime,
-                        score = dto.score,
-                        season = dto.season,
-                        leagueId = dto.leagueId,
-                        matchRound = dto.matchRound,
-                        stadium = dto.stadium,
-                        referee = dto.referee
-                    )
-                }
-                matchRepository.saveAll(entities)
-            } catch (e: Exception) {
-                e.printStackTrace()
+            val entities = matchDtos.map { dto ->
+                val existing = matchRepository.findByFixtureId(dto.fixtureId!!)
+                MatchEntity(
+                    id = existing?.id,
+                    fixtureId = dto.fixtureId,
+                    homeTeam = dto.homeTeam,
+                    awayTeam = dto.awayTeam,
+                    homeTeamId = dto.homeTeamId,
+                    awayTeamId = dto.awayTeamId,
+                    matchDate = dto.matchDate,
+                    matchTime = dto.matchTime,
+                    score = dto.score,
+                    season = dto.season,
+                    leagueId = dto.leagueId,
+                    matchRound = dto.matchRound,
+                    stadium = dto.stadium,
+                    referee = dto.referee
+                )
             }
+            matchRepository.saveAll(entities)
         }
     }
+
+    // 화면의 부가 정보처럼 없어도 되는 외부 API 조회. 실패하면 이유를 로그에 남기고 기본값으로 대신한다.
+    private fun <T> optionalExternal(what: String, fallback: T, block: () -> T): T =
+        try {
+            block()
+        } catch (e: ApiException) {
+            log.warn("{} 조회 실패, 생략합니다: {}", what, e.message)
+            fallback
+        }
 
     fun getLineups(fixtureId: Long): List<LineupDto> = apiService.fetchLineups(fixtureId)
     fun getPlayerCareerHistory(playerId: Long): List<PlayerSeasonStatEntity> = emptyList()
@@ -385,7 +391,7 @@ class SoccerService(
 
     fun importMatchEventsForTeam(teamId: Int, season: Int): String {
         val matches = matchRepository.findByTeamAndSeason(teamId, season)
-        var imported = 0; var skipped = 0
+        var imported = 0; var skipped = 0; var failed = 0
         matches.forEach { m ->
             val fid = m.fixtureId ?: return@forEach
             if (matchEventRepository.findByFixtureId(fid).isNotEmpty()) { skipped++; return@forEach }
@@ -393,9 +399,12 @@ class SoccerService(
                 val events = apiService.fetchFixtureEvents(fid)
                 if (events.isNotEmpty()) { matchEventRepository.saveAll(events); imported++ }
                 Thread.sleep(400)
-            } catch (e: Exception) { /* 무시 */ }
+            } catch (e: Exception) {
+                failed++
+                log.warn("[EventImport] fixture={} 실패: {}", fid, e.message)
+            }
         }
-        return "완료: 임포트 $imported 경기, 스킵 $skipped 경기"
+        return "완료: 임포트 $imported 경기, 스킵 $skipped 경기, 실패 $failed 경기"
     }
 
     // 5대 리그 전체 경기 이벤트 일괄 수집
@@ -666,19 +675,20 @@ class SoccerService(
             .map { it.season }
             .distinct()
             .take(3)
-            .ifEmpty { listOf(2025, 2024) }
+            .ifEmpty { seasons.effective().let { listOf(it, it - 1) } }
 
         val api = recentSeasons.firstNotNullOfOrNull { season ->
-            try {
-                val result = apiService.fetchPlayerDetails(playerId, season)
-                if (result?.squadNumber != null) result else null
-            } catch (e: Exception) { null }
-        } ?: try { apiService.fetchPlayerDetails(playerId, recentSeasons.first()) } catch (e: Exception) { null }
+            optionalExternal("선수 상세(playerId=$playerId, season=$season)", null) {
+                apiService.fetchPlayerDetails(playerId, season)?.takeIf { it.squadNumber != null }
+            }
+        } ?: optionalExternal("선수 상세(playerId=$playerId)", null) {
+            apiService.fetchPlayerDetails(playerId, recentSeasons.first())
+        }
 
         // 이번 시즌 스탯 (DB, 빅5 리그)
         val currentStats = playerSeasonStatRepository
             .findByPlayerIdOrderBySeasonDesc(playerId)
-            .firstOrNull { it.season == 2025 }
+            .firstOrNull { it.season == seasons.effective() }
             ?.let { s ->
                 CareerStatDto(
                     season = s.season, teamName = s.teamName, leagueName = s.leagueName,
@@ -796,7 +806,9 @@ class SoccerService(
 
     fun getTeamStats(teamId: Int, leagueId: Int, season: Int): TeamStatsDto {
         // 홈/원정 성적
-        val (home, away) = apiService.fetchTeamRecord(teamId, leagueId, season)
+        val (home, away) = optionalExternal("홈/원정 성적(teamId=$teamId)", Pair(null, null)) {
+            apiService.fetchTeamRecord(teamId, leagueId, season)
+        }
 
         // 팀 이름 조회 (playerSeasonStat은 teamName 기준으로 저장됨)
         val teamName = teamRepository.findById(teamId).orElse(null)?.name
@@ -889,14 +901,16 @@ class SoccerService(
         }
 
         // 2. 미니 순위표 (해당팀 ±1)
-        val allStandings = apiService.fetchStandings(leagueId, season)
+        val allStandings = optionalExternal("미니 순위표(leagueId=$leagueId)", emptyList()) {
+            apiService.fetchStandings(leagueId, season)
+        }
         val teamRank     = allStandings.find { it.teamId == teamId }?.rank ?: 0
         val miniStandings = if (teamRank > 0)
             allStandings.filter { it.rank in (teamRank - 1)..(teamRank + 1) }
         else emptyList()
 
         // 3. 경기장 정보
-        val venue = apiService.fetchTeamVenue(teamId)
+        val venue = optionalExternal("경기장 정보(teamId=$teamId)", null) { apiService.fetchTeamVenue(teamId) }
 
         // 4. 리그 트로피 (champions 테이블에서 조회)
         val trophies = championRepository.findByTeamId(teamId)

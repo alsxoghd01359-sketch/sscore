@@ -1,6 +1,7 @@
 package com.sscore.service
 
 import com.sscore.entity.LeagueEntity
+import com.sscore.football.SeasonResolver
 import com.sscore.repository.LeagueRepository
 import com.sscore.repository.MatchRepository
 import com.sscore.repository.TeamRepository
@@ -18,12 +19,12 @@ class DataInitService(
     private val leagueRepository: LeagueRepository,
     private val teamRepository: TeamRepository,
     private val matchRepository: MatchRepository,
+    private val seasons: SeasonResolver,
     @Value("\${sscore.init.enabled:true}") private val initEnabled: Boolean
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     private val bigFiveLeagueIds = listOf(39, 140, 78, 135, 61)
-    private val currentSeason    = 2025
 
     @PostConstruct
     fun initLeagues() {
@@ -51,15 +52,16 @@ class DataInitService(
             return
         }
 
+        val currentSeason = seasons.current()
         log.info("🚀 [DataInitService] DB가 비어 있음 → 현재 시즌({}) 데이터 적재 시작...", currentSeason)
         for (leagueId in bigFiveLeagueIds) {
             runCatching { apiService.syncTeams(leagueId, currentSeason) }
-                .onFailure { log.error("팀 초기화 실패: leagueId={}", leagueId) }
+                .onFailure { log.error("팀 초기화 실패: leagueId={}", leagueId, it) }
 
             Thread.sleep(300)
 
             runCatching { apiService.syncFixtures(leagueId, currentSeason) }
-                .onFailure { log.error("경기 초기화 실패: leagueId={}", leagueId) }
+                .onFailure { log.error("경기 초기화 실패: leagueId={}", leagueId, it) }
 
             Thread.sleep(300)
         }

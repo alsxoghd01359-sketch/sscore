@@ -15,6 +15,12 @@ interface MatchRepository : JpaRepository<MatchEntity, Long> {
 
     fun findByFixtureId(fixtureId: Long): MatchEntity?
 
+    fun existsBySeason(season: Int): Boolean
+
+    // 데이터가 있는 가장 최근 시즌 (기준 시즌 이하)
+    @Query("SELECT MAX(m.season) FROM MatchEntity m WHERE m.season <= :season")
+    fun latestSeasonUpTo(@Param("season") season: Int): Int?
+
     fun findByMatchDate(matchDate: String): List<MatchEntity>
 
     fun findByMatchDateAndLeagueId(matchDate: String, leagueId: Int): List<MatchEntity>
