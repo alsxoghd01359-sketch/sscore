@@ -6,6 +6,7 @@ import com.sscore.repository.MatchRepository
 import com.sscore.repository.TeamRepository
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,7 +17,8 @@ class DataInitService(
     private val apiService: ApiFootballService,
     private val leagueRepository: LeagueRepository,
     private val teamRepository: TeamRepository,
-    private val matchRepository: MatchRepository
+    private val matchRepository: MatchRepository,
+    @Value("\${sscore.init.enabled:true}") private val initEnabled: Boolean
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -42,6 +44,7 @@ class DataInitService(
 
     @PostConstruct
     fun initCurrentSeasonIfEmpty() {
+        if (!initEnabled) return
         val matchCount = matchRepository.count()
         if (matchCount > 0) {
             log.info("✅ [DataInitService] DB에 경기 데이터 {}건 존재 → 초기화 스킵", matchCount)
