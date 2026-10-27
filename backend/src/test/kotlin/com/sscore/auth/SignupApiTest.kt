@@ -190,6 +190,17 @@ class SignupApiTest : ApiTest() {
     }
 
     @Test
+    fun `메일 발송이 실패하면 502를 돌려주고 가입 요청도 남기지 않는다`() {
+        mail.failing = true
+
+        signup().andExpect {
+            status { isBadGateway() }
+            jsonPath("$.code") { value("MAIL_SEND_FAILED") }
+        }
+        assertEquals(0, pendings.count())
+    }
+
+    @Test
     fun `진행 중인 가입이 없으면 인증과 재발송은 404이다`() {
         verify("123456").andExpect { status { isNotFound() } }
         resend().andExpect { status { isNotFound() } }

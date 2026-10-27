@@ -11,13 +11,20 @@ class FakeMailPort : MailPort {
 
     val sent = mutableListOf<Sent>()
 
+    // true면 발송이 실패한 것처럼 예외를 던진다 (SMTP 인증 실패 등)
+    var failing = false
+
     override fun sendVerificationCode(email: String, code: String, validMinutes: Int) {
+        if (failing) throw IllegalStateException("SMTP 오류")
         sent += Sent(email, code)
     }
 
     fun lastCodeTo(email: String): String = sent.last { it.email == email }.code
 
-    fun clear() = sent.clear()
+    fun clear() {
+        sent.clear()
+        failing = false
+    }
 }
 
 @TestConfiguration

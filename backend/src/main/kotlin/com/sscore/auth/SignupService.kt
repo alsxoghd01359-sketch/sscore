@@ -3,6 +3,7 @@ package com.sscore.auth
 import com.sscore.common.ApiException
 import com.sscore.member.Member
 import com.sscore.member.MemberRepository
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -22,6 +23,8 @@ class SignupService(
     private val passwordEncoder: PasswordEncoder,
     private val clock: Clock
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     companion object {
         val CODE_VALID: Duration = Duration.ofMinutes(10)
         val RESEND_INTERVAL: Duration = Duration.ofSeconds(30)
@@ -74,7 +77,7 @@ class SignupService(
                 )
             )
         }
-        mail.sendVerificationCode(email, code, CODE_VALID.toMinutes().toInt())
+        sendCode(email, code)
         return started(email)
     }
 
@@ -94,7 +97,7 @@ class SignupService(
         pending.failedAttempts = 0
         pending.resendCount += 1
         pending.lastSentAt = now
-        mail.sendVerificationCode(email, code, CODE_VALID.toMinutes().toInt())
+        sendCode(email, code)
         return started(email)
     }
 
@@ -169,6 +172,16 @@ class SignupService(
         if (now.isBefore(nextAllowed)) {
             val wait = Duration.between(now, nextAllowed).seconds + 1
             throw ApiException(HttpStatus.TOO_MANY_REQUESTS, "RESEND_TOO_SOON", "${wait}초 후에 다시 요청해 주세요.")
+        }
+    }
+
+    // 메일 발송이 실패하면 가입 요청도 저장하지 않는다(예외로 롤백). 원인은 서버 로그에 남긴다.
+    private fun sendCode(email: String, code: String) {
+        try {
+            mail.sendVerificationCode(email, code, CODE_VALID.toMinutes().toInt())
+        } catch (e: Exception) {
+            log.error("인증 메일 발송 실패: to={}", email, e)
+            throw ApiException(HttpStatus.BAD_GATEWAY, "MAIL_SEND_FAILED", "인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.")
         }
     }
 
