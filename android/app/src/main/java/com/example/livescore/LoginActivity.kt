@@ -1,6 +1,7 @@
 package com.example.livescore
 
 import android.content.Intent
+import com.example.livescore.auth.RegisterActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
