@@ -53,10 +53,10 @@ class TimelineAdapter(
         holder.tvHomeAssist.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
         holder.tvAwayPlayer.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
         holder.tvAwayAssist.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-        holder.tvHomePlayer.setTextColor(Color.WHITE)
-        holder.tvHomeAssist.setTextColor(Color.parseColor("#888888"))
-        holder.tvAwayPlayer.setTextColor(Color.WHITE)
-        holder.tvAwayAssist.setTextColor(Color.parseColor("#888888"))
+        holder.tvHomePlayer.setTextColor(Color.parseColor("#1A1A1A"))
+        holder.tvHomeAssist.setTextColor(Color.parseColor("#6B7280"))
+        holder.tvAwayPlayer.setTextColor(Color.parseColor("#1A1A1A"))
+        holder.tvAwayAssist.setTextColor(Color.parseColor("#6B7280"))
         holder.tvHomeIcon.visibility   = View.VISIBLE
         holder.tvAwayIcon.visibility   = View.VISIBLE
         holder.ivHomePenMiss.visibility = View.GONE
@@ -110,7 +110,7 @@ class TimelineAdapter(
                         holder.tvHomeAssist.text = subText
                         holder.tvHomeAssist.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_sub_out, 0)
                         holder.tvHomeAssist.compoundDrawablePadding = 12
-                        holder.tvHomeAssist.setTextColor(Color.parseColor("#FF4D4D"))
+                        holder.tvHomeAssist.setTextColor(Color.parseColor("#DC2626"))
                     } else {
                         holder.tvHomeAssist.visibility = View.GONE
                     }
@@ -146,7 +146,7 @@ class TimelineAdapter(
                         holder.tvAwayAssist.text = subText
                         holder.tvAwayAssist.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sub_out, 0, 0, 0)
                         holder.tvAwayAssist.compoundDrawablePadding = 12
-                        holder.tvAwayAssist.setTextColor(Color.parseColor("#FF4D4D"))
+                        holder.tvAwayAssist.setTextColor(Color.parseColor("#DC2626"))
                     } else {
                         holder.tvAwayAssist.visibility = View.GONE
                     }

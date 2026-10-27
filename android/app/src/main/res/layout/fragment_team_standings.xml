@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#101411"
+    android:background="@color/bg"
     android:orientation="vertical"
     android:padding="3dp">
 
@@ -34,7 +34,7 @@
                 android:id="@+id/tvLeagueName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/text_primary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -42,7 +42,7 @@
                 android:id="@+id/tvCurrentSeason"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#AAAAAA"
+                android:textColor="@color/text_muted"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -51,7 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="▼"
-            android:textColor="#AAAAAA"
+            android:textColor="@color/text_muted"
             android:textSize="12sp" />
     </LinearLayout>
 
@@ -60,7 +60,7 @@
         android:id="@+id/scrollSeasonList"
         android:layout_width="match_parent"
         android:layout_height="220dp"
-        android:background="#1E1E1E"
+        android:background="@color/surface"
         android:visibility="gone">
 
         <LinearLayout
@@ -82,44 +82,44 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingHorizontal="8dp"
-        android:background="#1C1C1C">
+        android:background="@color/surface">
 
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:text="#" android:textColor="#888888" android:textSize="11sp"
+            android:text="#" android:textColor="@color/text_secondary" android:textSize="11sp"
             android:gravity="center"/>
         <!-- 로고 자리 스페이서 (20dp + 6dp margin) -->
         <View android:layout_width="26dp" android:layout_height="1dp"/>
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="2.0"
-            android:text="팀" android:textColor="#888888" android:textSize="11sp"/>
+            android:text="팀" android:textColor="@color/text_secondary" android:textSize="11sp"/>
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="0.45"
-            android:text="경기" android:textColor="#888888" android:textSize="10sp"
+            android:text="경기" android:textColor="@color/text_secondary" android:textSize="10sp"
             android:gravity="center"/>
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="0.4"
-            android:text="승" android:textColor="#888888" android:textSize="10sp"
+            android:text="승" android:textColor="@color/text_secondary" android:textSize="10sp"
             android:gravity="center"/>
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="0.4"
-            android:text="무" android:textColor="#888888" android:textSize="10sp"
+            android:text="무" android:textColor="@color/text_secondary" android:textSize="10sp"
             android:gravity="center"/>
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="0.4"
-            android:text="패" android:textColor="#888888" android:textSize="10sp"
+            android:text="패" android:textColor="@color/text_secondary" android:textSize="10sp"
             android:gravity="center"/>
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1.1"
-            android:text="+/-" android:textColor="#888888" android:textSize="10sp"
+            android:text="+/-" android:textColor="@color/text_secondary" android:textSize="10sp"
             android:gravity="center"/>
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="0.65"
-            android:text="=" android:textColor="#888888" android:textSize="10sp"
+            android:text="=" android:textColor="@color/text_secondary" android:textSize="10sp"
             android:gravity="center"/>
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="0.55"
-            android:text="승점" android:textColor="#888888" android:textSize="10sp"
+            android:text="승점" android:textColor="@color/text_secondary" android:textSize="10sp"
             android:gravity="center"/>
     </LinearLayout>
 

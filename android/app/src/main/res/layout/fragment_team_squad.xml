@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#101411"
+    android:background="@color/bg"
     android:orientation="vertical">
 
     <ProgressBar
@@ -24,42 +24,42 @@
 
             <!-- 골키퍼 박스 -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="골키퍼" android:textColor="#888888"
+                android:text="골키퍼" android:textColor="@color/text_secondary"
                 android:textSize="13sp" android:textStyle="bold"
                 android:layout_marginBottom="6dp"/>
             <LinearLayout android:id="@+id/layoutGK"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:background="#1C1C1C" android:orientation="vertical"
+                android:background="@color/surface" android:orientation="vertical"
                 android:layout_marginBottom="16dp"/>
 
             <!-- 수비수 박스 -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="수비수" android:textColor="#888888"
+                android:text="수비수" android:textColor="@color/text_secondary"
                 android:textSize="13sp" android:textStyle="bold"
                 android:layout_marginBottom="6dp"/>
             <LinearLayout android:id="@+id/layoutDF"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:background="#1C1C1C" android:orientation="vertical"
+                android:background="@color/surface" android:orientation="vertical"
                 android:layout_marginBottom="16dp"/>
 
             <!-- 미드필더 박스 -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="미드필더" android:textColor="#888888"
+                android:text="미드필더" android:textColor="@color/text_secondary"
                 android:textSize="13sp" android:textStyle="bold"
                 android:layout_marginBottom="6dp"/>
             <LinearLayout android:id="@+id/layoutMF"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:background="#1C1C1C" android:orientation="vertical"
+                android:background="@color/surface" android:orientation="vertical"
                 android:layout_marginBottom="16dp"/>
 
             <!-- 공격수 박스 -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="공격수" android:textColor="#888888"
+                android:text="공격수" android:textColor="@color/text_secondary"
                 android:textSize="13sp" android:textStyle="bold"
                 android:layout_marginBottom="6dp"/>
             <LinearLayout android:id="@+id/layoutFW"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:background="#1C1C1C" android:orientation="vertical"
+                android:background="@color/surface" android:orientation="vertical"
                 android:layout_marginBottom="8dp"/>
 
         </LinearLayout>

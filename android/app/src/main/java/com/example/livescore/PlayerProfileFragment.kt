@@ -84,7 +84,7 @@ class PlayerProfileFragment : Fragment() {
                 binding.tvSeasonRating.setTextColor(ratingColor(s.rating))
             } else {
                 binding.tvSeasonRating.text = "-"
-                binding.tvSeasonRating.setTextColor(Color.parseColor("#888888"))
+                binding.tvSeasonRating.setTextColor(Color.parseColor("#6B7280"))
             }
         } else {
             binding.tvSeasonHeader.text  = "이번 시즌 데이터 없음"
@@ -92,7 +92,7 @@ class PlayerProfileFragment : Fragment() {
             binding.tvSeasonGoals.text   = "-"
             binding.tvSeasonAssists.text = "-"
             binding.tvSeasonRating.text  = "-"
-            binding.tvSeasonRating.setTextColor(Color.parseColor("#888888"))
+            binding.tvSeasonRating.setTextColor(Color.parseColor("#6B7280"))
         }
     }
 
@@ -114,10 +114,10 @@ class PlayerProfileFragment : Fragment() {
     }
 
     private fun ratingColor(r: Double) = when {
-        r >= 8.0 -> Color.parseColor("#20EFFF")
-        r >= 7.0 -> Color.parseColor("#20E07A")
-        r >= 6.0 -> Color.parseColor("#FF9C33")
-        else     -> Color.parseColor("#FF6363")
+        r >= 8.0 -> Color.parseColor("#0891B2")
+        r >= 7.0 -> Color.parseColor("#16A34A")
+        r >= 6.0 -> Color.parseColor("#D97706")
+        else     -> Color.parseColor("#DC2626")
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

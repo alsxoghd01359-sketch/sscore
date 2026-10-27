@@ -39,11 +39,11 @@ class DateAdapter(
             binding.tvDay.text = dayStr
 
             if (position == selectedPosition) {
-                binding.tvDate.setTextColor(Color.parseColor("#20E07A"))
-                binding.tvDay.setTextColor(Color.parseColor("#20E07A"))
+                binding.tvDate.setTextColor(Color.parseColor("#F2711C"))
+                binding.tvDay.setTextColor(Color.parseColor("#F2711C"))
             } else {
-                binding.tvDate.setTextColor(Color.parseColor("#FFFFFF"))
-                binding.tvDay.setTextColor(Color.parseColor("#888888"))
+                binding.tvDate.setTextColor(Color.parseColor("#1A1A1A"))
+                binding.tvDay.setTextColor(Color.parseColor("#6B7280"))
             }
 
             binding.root.setOnClickListener {

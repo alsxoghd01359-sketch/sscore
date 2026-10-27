@@ -5,7 +5,7 @@
     android:paddingTop="24dp"
     android:paddingBottom="12dp"
     android:text="OVERALL"
-    android:textColor="#20E07A"
+    android:textColor="@color/accent"
     android:textSize="14sp"
     android:textStyle="bold"
     android:gravity="center"/>

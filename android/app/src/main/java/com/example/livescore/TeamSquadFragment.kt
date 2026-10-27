@@ -108,7 +108,7 @@ class TeamSquadFragment : Fragment() {
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, dp(1)
                     ).also { it.setMargins(dp(14), 0, dp(14), 0) }
-                    setBackgroundColor(Color.parseColor("#2A2A2A"))
+                    setBackgroundColor(Color.parseColor("#E6E8EB"))
                 }
                 container.addView(row)
                 container.addView(divider)

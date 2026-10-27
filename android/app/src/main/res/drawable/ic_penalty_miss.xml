@@ -8,35 +8,35 @@
     <!-- 위쪽 가로선 -->
     <path
         android:pathData="M1.5,3.5 L20.5,3.5"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="@color/text_primary"
         android:strokeWidth="1.5"
         android:strokeLineCap="square" />
 
     <!-- 왼쪽 세로선 -->
     <path
         android:pathData="M1.5,3.5 L1.5,14"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="@color/text_primary"
         android:strokeWidth="1.5"
         android:strokeLineCap="square" />
 
     <!-- 오른쪽 세로선 -->
     <path
         android:pathData="M20.5,3.5 L20.5,14"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="@color/text_primary"
         android:strokeWidth="1.5"
         android:strokeLineCap="square" />
 
     <!-- X 표시 - 대각선 \ -->
     <path
         android:pathData="M5,7 L17,13"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="@color/text_primary"
         android:strokeWidth="2"
         android:strokeLineCap="round" />
 
     <!-- X 표시 - 대각선 / -->
     <path
         android:pathData="M17,7 L5,13"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="@color/text_primary"
         android:strokeWidth="2"
         android:strokeLineCap="round" />
 

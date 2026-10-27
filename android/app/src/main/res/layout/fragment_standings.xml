@@ -2,18 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#101411"
+    android:background="@color/bg"
     android:orientation="vertical"
     android:padding="16dp">
 
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <TableRow android:background="#1A1F1B" android:padding="10dp">
-            <TextView android:text="순위" android:textColor="#20E07A" android:layout_weight="1"/>
-            <TextView android:text="팀명" android:textColor="#20E07A" android:layout_weight="4"/>
-            <TextView android:text="경기" android:textColor="#20E07A" android:layout_weight="1"/>
-            <TextView android:text="승점" android:textColor="#20E07A" android:layout_weight="1"/>
+        <TableRow android:background="@color/surface" android:padding="10dp">
+            <TextView android:text="순위" android:textColor="@color/accent" android:layout_weight="1"/>
+            <TextView android:text="팀명" android:textColor="@color/accent" android:layout_weight="4"/>
+            <TextView android:text="경기" android:textColor="@color/accent" android:layout_weight="1"/>
+            <TextView android:text="승점" android:textColor="@color/accent" android:layout_weight="1"/>
         </TableRow>
     </TableLayout>
 

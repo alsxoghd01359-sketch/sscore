@@ -27,17 +27,17 @@ class SearchResultAdapter(
                         .placeholder(R.drawable.bg_player_circle)
                         .into(b.ivLogo)
                     b.tvType.text = "선수"
-                    b.tvType.setTextColor(Color.parseColor("#20E07A"))
+                    b.tvType.setTextColor(Color.parseColor("#F2711C"))
                 }
                 "TEAM" -> {
                     Glide.with(b.ivLogo).load(item.logoUrl).into(b.ivLogo)
                     b.tvType.text = "구단"
-                    b.tvType.setTextColor(Color.parseColor("#5BA8FF"))
+                    b.tvType.setTextColor(Color.parseColor("#2563EB"))
                 }
                 "LEAGUE" -> {
                     Glide.with(b.ivLogo).load(item.logoUrl).into(b.ivLogo)
                     b.tvType.text = "리그"
-                    b.tvType.setTextColor(Color.parseColor("#FFD700"))
+                    b.tvType.setTextColor(Color.parseColor("#CA8A04"))
                 }
             }
 

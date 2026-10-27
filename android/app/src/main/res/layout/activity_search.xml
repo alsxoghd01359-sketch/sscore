@@ -5,7 +5,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#101411">
+        android:background="@color/bg">
 
         <LinearLayout
             android:id="@+id/bottomNav"
@@ -13,18 +13,18 @@
             android:layout_height="72dp"
             android:layout_alignParentBottom="true"
             android:orientation="horizontal"
-            android:background="#181C19">
+            android:background="@color/surface">
 
             <TextView android:id="@+id/navMatch"
                 android:layout_width="0dp" android:layout_height="match_parent"
                 android:layout_weight="1" android:gravity="center"
-                android:text="경기" android:textColor="#FFFFFF" android:textSize="14sp"
+                android:text="경기" android:textColor="@color/text_primary" android:textSize="14sp"
                 android:clickable="true" android:focusable="true"/>
 
             <TextView android:id="@+id/navSearch"
                 android:layout_width="0dp" android:layout_height="match_parent"
                 android:layout_weight="1" android:gravity="center"
-                android:text="검색" android:textColor="#20E07A"
+                android:text="검색" android:textColor="@color/accent"
                 android:textStyle="bold" android:textSize="14sp"/>
         </LinearLayout>
 
@@ -38,14 +38,14 @@
                 android:layout_width="match_parent" android:layout_height="84dp"
                 android:orientation="horizontal" android:gravity="bottom"
                 android:paddingHorizontal="12dp" android:paddingBottom="10dp"
-                android:background="#1A1A1A">
+                android:background="@color/surface">
 
                 <ImageView android:id="@+id/btnBack"
                     android:layout_width="40dp" android:layout_height="40dp"
                     android:src="@drawable/ic_arrow_back" android:padding="8dp"
                     android:clickable="true"
                     android:focusable="true"
-                    app:tint="#FFFFFF"/>
+                    app:tint="@color/text_primary"/>
 
                 <EditText android:id="@+id/etSearch"
                     android:layout_width="0dp" android:layout_height="40dp"
@@ -54,7 +54,7 @@
                     android:background="@drawable/edittext_bg"
                     android:paddingHorizontal="14dp"
                     android:hint="선수, 구단, 리그 검색"
-                    android:textColor="#FFFFFF" android:textColorHint="#555555"
+                    android:textColor="@color/text_primary" android:textColorHint="@color/text_hint"
                     android:textSize="15sp" android:imeOptions="actionSearch"
                     android:inputType="text" android:singleLine="true"/>
 

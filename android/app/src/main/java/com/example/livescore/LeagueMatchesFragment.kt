@@ -91,7 +91,7 @@ class LeagueMatchesFragment : Fragment() {
         container.addView(TextView(requireContext()).apply {
             text = formatDate(day.date)
             textSize = 13f
-            setTextColor(Color.parseColor("#888888"))
+            setTextColor(Color.parseColor("#6B7280"))
             setTypeface(null, Typeface.BOLD)
             setPadding(dp(4), dp(12), dp(4), dp(6))
             layoutParams = LinearLayout.LayoutParams(
@@ -102,7 +102,7 @@ class LeagueMatchesFragment : Fragment() {
         // 날짜 박스
         val box = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#1C1C1C"))
+            setBackgroundColor(Color.parseColor("#F4F5F7"))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -113,7 +113,7 @@ class LeagueMatchesFragment : Fragment() {
             // 구분선 (첫 행 제외)
             if (idx > 0) {
                 box.addView(View(requireContext()).apply {
-                    setBackgroundColor(Color.parseColor("#2A2A2A"))
+                    setBackgroundColor(Color.parseColor("#E6E8EB"))
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, 1
                     ).also { it.setMargins(dp(12), 0, dp(12), 0) }
@@ -162,7 +162,7 @@ class LeagueMatchesFragment : Fragment() {
         homeLayout.addView(TextView(requireContext()).apply {
             text = match.homeTeam
             textSize = 14f
-            setTextColor(Color.WHITE)
+            setTextColor(Color.parseColor("#1A1A1A"))
             gravity = Gravity.END
             layoutParams = LinearLayout.LayoutParams(0,
                 LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -181,7 +181,7 @@ class LeagueMatchesFragment : Fragment() {
         row.addView(TextView(requireContext()).apply {
             text = if (isFinished) (match.score ?: "") else (match.matchTime ?: "")
             textSize = if (isFinished) 16f else 13f
-            setTextColor(if (isFinished) Color.WHITE else Color.parseColor("#888888"))
+            setTextColor(if (isFinished) Color.parseColor("#1A1A1A") else Color.parseColor("#6B7280"))
             setTypeface(null, Typeface.BOLD)
             gravity = Gravity.CENTER
             layoutParams = LinearLayout.LayoutParams(dp(80),
@@ -204,7 +204,7 @@ class LeagueMatchesFragment : Fragment() {
         awayLayout.addView(TextView(requireContext()).apply {
             text = match.awayTeam
             textSize = 14f
-            setTextColor(Color.WHITE)
+            setTextColor(Color.parseColor("#1A1A1A"))
             layoutParams = LinearLayout.LayoutParams(0,
                 LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         })

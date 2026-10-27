@@ -60,7 +60,7 @@ class PlayerMatchesFragment : Fragment() {
         container.addView(TextView(requireContext()).apply {
             text = formatDate(m.matchDate)
             textSize = 14f
-            setTextColor(Color.parseColor("#888888"))
+            setTextColor(Color.parseColor("#6B7280"))
             setPadding(dp(4), dp(12), dp(4), dp(6))
         })
 
@@ -68,7 +68,7 @@ class PlayerMatchesFragment : Fragment() {
         val card = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity     = Gravity.CENTER_VERTICAL
-            setBackgroundColor(Color.parseColor("#1C1C1C"))
+            setBackgroundColor(Color.parseColor("#F4F5F7"))
             setPadding(dp(14), dp(14), dp(14), dp(14))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -110,13 +110,13 @@ class PlayerMatchesFragment : Fragment() {
         infoCol.addView(TextView(requireContext()).apply {
             text = m.opponentName
             textSize = 16f
-            setTextColor(Color.WHITE)
+            setTextColor(Color.parseColor("#1A1A1A"))
             setTypeface(null, Typeface.BOLD)
         })
         infoCol.addView(TextView(requireContext()).apply {
             text = "${if (m.isHome) "홈" else "원정"}  ${m.score}"
             textSize = 13f
-            setTextColor(Color.parseColor("#888888"))
+            setTextColor(Color.parseColor("#6B7280"))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -171,7 +171,7 @@ class PlayerMatchesFragment : Fragment() {
                 minuteRow.addView(TextView(requireContext()).apply {
                     text = statusText
                     textSize = 12f
-                    setTextColor(Color.parseColor(if (m.status == "SUBBED_ON") "#20E07A" else "#FF9C33"))
+                    setTextColor(Color.parseColor(if (m.status == "SUBBED_ON") "#16A34A" else "#D97706"))
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
@@ -182,7 +182,7 @@ class PlayerMatchesFragment : Fragment() {
                 minuteRow.addView(TextView(requireContext()).apply {
                     text = "${m.minutesPlayed}'"
                     textSize = 14f
-                    setTextColor(Color.parseColor("#AAAAAA"))
+                    setTextColor(Color.parseColor("#4B5563"))
                 })
             }
             if (minuteRow.childCount > 0) rightCol.addView(minuteRow)
@@ -207,7 +207,7 @@ class PlayerMatchesFragment : Fragment() {
             rightCol.addView(TextView(requireContext()).apply {
                 text = fallback
                 textSize = 13f
-                setTextColor(Color.parseColor("#555555"))
+                setTextColor(Color.parseColor("#9CA3AF"))
                 gravity = Gravity.END
             })
         }
@@ -222,8 +222,8 @@ class PlayerMatchesFragment : Fragment() {
     } catch (e: Exception) { raw }
 
     private fun ratingColor(r: Double) = when {
-        r >= 8.0 -> "#20EFFF"; r >= 7.0 -> "#20E07A"
-        r >= 6.0 -> "#FF9C33"; else -> "#FF6363"
+        r >= 8.0 -> "#0891B2"; r >= 7.0 -> "#16A34A"
+        r >= 6.0 -> "#D97706"; else -> "#DC2626"
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()

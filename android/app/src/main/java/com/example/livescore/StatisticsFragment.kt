@@ -60,11 +60,11 @@ class StatisticsFragment : Fragment() {
             name.contains("united") || name.contains("manchester utd") -> "#DA291C"
             name.contains("arsenal")                           -> "#EF0107"
             name.contains("tottenham") || name.contains("spurs") -> "#132257"
-            name.contains("real madrid")                       -> "#FFFFFF"
+            name.contains("real madrid")                       -> "#1A1A1A"
             name.contains("barcelona")                         -> "#004D98"
             name.contains("bayern") || name.contains("munich") -> "#DC052D"
             name.contains("paris") || name.contains("psg")    -> "#004170"
-            else -> if (isHome) "#20E07A" else "#FF4D4D"
+            else -> if (isHome) "#F2711C" else "#2563EB"
         }
     }
 

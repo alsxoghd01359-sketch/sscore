@@ -94,8 +94,8 @@ class PlayerMatchStatsDialog : DialogFragment() {
 
         val ratingText = d.rating?.let { "%.1f".format(it) } ?: "-"
         binding.tvRatingBadge.text = ratingText
-        binding.tvRatingBadge.setTextColor(Color.parseColor("#1A1A1A"))
-        val bgColor = if (d.rating != null) ratingBgColor(d.rating) else Color.parseColor("#888888")
+        binding.tvRatingBadge.setTextColor(Color.parseColor("#FFFFFF"))
+        val bgColor = if (d.rating != null) ratingBgColor(d.rating) else Color.parseColor("#6B7280")
         binding.tvRatingBadge.background = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = 6 * resources.displayMetrics.density
@@ -177,7 +177,7 @@ class PlayerMatchStatsDialog : DialogFragment() {
         parent.addView(TextView(requireContext()).apply {
             text = title
             textSize = 13f
-            setTextColor(Color.parseColor("#888888"))
+            setTextColor(Color.parseColor("#6B7280"))
             setTypeface(null, Typeface.BOLD)
             setPadding(dp(16), dp(14), dp(16), dp(4))
         })
@@ -185,7 +185,7 @@ class PlayerMatchStatsDialog : DialogFragment() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(1))
                 .also { it.setMargins(dp(16), 0, dp(16), 0) }
-            setBackgroundColor(Color.parseColor("#2A2A2A"))
+            setBackgroundColor(Color.parseColor("#E6E8EB"))
         })
     }
 
@@ -200,7 +200,7 @@ class PlayerMatchStatsDialog : DialogFragment() {
         row.addView(TextView(requireContext()).apply {
             text = label
             textSize = 15f
-            setTextColor(Color.parseColor("#CCCCCC"))
+            setTextColor(Color.parseColor("#374151"))
             layoutParams = LinearLayout.LayoutParams(
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         })
@@ -208,7 +208,7 @@ class PlayerMatchStatsDialog : DialogFragment() {
         row.addView(TextView(requireContext()).apply {
             text = value ?: "-"
             textSize = 15f
-            setTextColor(if (!isNull) Color.WHITE else Color.parseColor("#555555"))
+            setTextColor(if (!isNull) Color.parseColor("#1A1A1A") else Color.parseColor("#9CA3AF"))
             setTypeface(null, if (!isNull) Typeface.BOLD else Typeface.NORMAL)
             gravity = Gravity.END
             layoutParams = LinearLayout.LayoutParams(
@@ -227,10 +227,10 @@ class PlayerMatchStatsDialog : DialogFragment() {
     }
 
     private fun ratingBgColor(r: Double) = when {
-        r >= 8.0 -> Color.parseColor("#20EFFF")
-        r >= 7.0 -> Color.parseColor("#20E07A")
-        r >= 6.0 -> Color.parseColor("#FF9C33")
-        else     -> Color.parseColor("#FF6363")
+        r >= 8.0 -> Color.parseColor("#0891B2")
+        r >= 7.0 -> Color.parseColor("#16A34A")
+        r >= 6.0 -> Color.parseColor("#D97706")
+        else     -> Color.parseColor("#DC2626")
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()

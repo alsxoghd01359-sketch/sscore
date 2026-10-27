@@ -11,7 +11,7 @@
         android:id="@+id/vCenterLine"
         android:layout_width="1dp"
         android:layout_height="0dp"
-        android:background="#444444"
+        android:background="@color/surface_variant"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,10 +23,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="00'"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/text_primary"
         android:textStyle="bold"
         android:textSize="14sp"
-        android:background="#1E1E1E"
+        android:background="@color/surface"
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -58,14 +58,14 @@
                 android:id="@+id/tvHomePlayer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/text_primary"
                 android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tvHomeAssist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#888888"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp"
                 android:visibility="gone" />
         </LinearLayout>
@@ -136,14 +136,14 @@
                 android:id="@+id/tvAwayPlayer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/text_primary"
                 android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tvAwayAssist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#888888"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp"
                 android:visibility="gone" />
         </LinearLayout>

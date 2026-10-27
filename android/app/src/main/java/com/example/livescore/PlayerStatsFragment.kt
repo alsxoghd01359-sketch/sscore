@@ -80,7 +80,7 @@ class PlayerStatsFragment : Fragment() {
 
         val summaryBox = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(Color.parseColor("#1C1C1C"))
+            setBackgroundColor(Color.parseColor("#F4F5F7"))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(80)
             ).also { it.bottomMargin = dp(14) }
@@ -154,14 +154,14 @@ class PlayerStatsFragment : Fragment() {
             c.addView(TextView(requireContext()).apply {
                 text = "* 경기 상세를 조회한 경기가 없어 상세 스탯 집계 불가"
                 textSize = 12f
-                setTextColor(Color.parseColor("#555555"))
+                setTextColor(Color.parseColor("#9CA3AF"))
                 setPadding(0, dp(8), 0, 0)
             })
         } else {
             c.addView(TextView(requireContext()).apply {
                 text = "* 상세 스탯: ${d.matchesWithData}경기 기준 집계"
                 textSize = 12f
-                setTextColor(Color.parseColor("#555555"))
+                setTextColor(Color.parseColor("#9CA3AF"))
                 setPadding(0, dp(8), 0, 0)
             })
         }
@@ -170,7 +170,7 @@ class PlayerStatsFragment : Fragment() {
     private fun sectionHeader(title: String) = TextView(requireContext()).apply {
         text = title
         textSize = 14f
-        setTextColor(Color.parseColor("#888888"))
+        setTextColor(Color.parseColor("#6B7280"))
         setTypeface(null, Typeface.BOLD)
         setPadding(0, dp(4), 0, dp(6))
         layoutParams = LinearLayout.LayoutParams(
@@ -188,14 +188,14 @@ class PlayerStatsFragment : Fragment() {
             addView(TextView(requireContext()).apply {
                 text = value
                 textSize = 18f
-                setTextColor(Color.WHITE)
+                setTextColor(Color.parseColor("#1A1A1A"))
                 setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.CENTER
             })
             addView(TextView(requireContext()).apply {
                 text = label
                 textSize = 11f
-                setTextColor(Color.parseColor("#888888"))
+                setTextColor(Color.parseColor("#6B7280"))
                 gravity = Gravity.CENTER
             })
         }
@@ -204,7 +204,7 @@ class PlayerStatsFragment : Fragment() {
     private fun statsGroup(vararg pairs: Pair<String, String>): LinearLayout {
         val box = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#1C1C1C"))
+            setBackgroundColor(Color.parseColor("#F4F5F7"))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -212,7 +212,7 @@ class PlayerStatsFragment : Fragment() {
         }
         pairs.forEachIndexed { idx, (label, value) ->
             if (idx > 0) box.addView(View(requireContext()).apply {
-                setBackgroundColor(Color.parseColor("#2A2A2A"))
+                setBackgroundColor(Color.parseColor("#E6E8EB"))
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, 1
                 ).also { it.setMargins(dp(14), 0, dp(14), 0) }
@@ -225,13 +225,13 @@ class PlayerStatsFragment : Fragment() {
             row.addView(TextView(requireContext()).apply {
                 text = label
                 textSize = 14f
-                setTextColor(Color.parseColor("#AAAAAA"))
+                setTextColor(Color.parseColor("#4B5563"))
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             })
             row.addView(TextView(requireContext()).apply {
                 text = value
                 textSize = 15f
-                setTextColor(Color.WHITE)
+                setTextColor(Color.parseColor("#1A1A1A"))
                 setTypeface(null, Typeface.BOLD)
             })
             box.addView(row)

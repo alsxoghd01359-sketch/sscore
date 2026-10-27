@@ -65,7 +65,7 @@ class TeamTrophiesFragment : Fragment() {
             container.addView(TextView(requireContext()).apply {
                 text = "우승 기록이 없습니다"
                 textSize = 14f
-                setTextColor(Color.parseColor("#888888"))
+                setTextColor(Color.parseColor("#6B7280"))
                 gravity = Gravity.CENTER
                 setPadding(0, dp(40), 0, 0)
                 layoutParams = LinearLayout.LayoutParams(
@@ -80,7 +80,7 @@ class TeamTrophiesFragment : Fragment() {
             val card = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = android.view.Gravity.CENTER_VERTICAL
-                setBackgroundColor(Color.parseColor("#1C1C1C"))
+                setBackgroundColor(Color.parseColor("#F4F5F7"))
                 setPadding(dp(16), dp(14), dp(16), dp(14))
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -107,13 +107,13 @@ class TeamTrophiesFragment : Fragment() {
             infoCol.addView(TextView(requireContext()).apply {
                 text = trophy.league ?: "리그"
                 textSize = 16f
-                setTextColor(Color.WHITE)
+                setTextColor(Color.parseColor("#1A1A1A"))
                 setTypeface(null, Typeface.BOLD)
             })
             infoCol.addView(TextView(requireContext()).apply {
                 text = "최근 우승: ${trophy.lastWinSeason ?: "-"}"
                 textSize = 13f
-                setTextColor(Color.parseColor("#888888"))
+                setTextColor(Color.parseColor("#6B7280"))
             })
             card.addView(infoCol)
 
@@ -121,7 +121,7 @@ class TeamTrophiesFragment : Fragment() {
             card.addView(TextView(requireContext()).apply {
                 text = "${trophy.winCount}회"
                 textSize = 18f
-                setTextColor(Color.parseColor("#FFD700"))
+                setTextColor(Color.parseColor("#CA8A04"))
                 setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.END or Gravity.CENTER_VERTICAL
             })

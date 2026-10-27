@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#101411"
+    android:background="@color/bg"
     android:orientation="vertical"
     android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1A1F1B"
+        android:background="@color/surface"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="최근 맞대결 요약 (10경기)"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold"
             android:layout_gravity="center"
@@ -29,14 +29,14 @@
             android:orientation="horizontal"
             android:gravity="center">
 
-            <TextView android:id="@+id/tvHomeWins" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#20E07A" android:textSize="20sp" android:textStyle="bold" android:text="0"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#888888" android:text=" 승  " />
+            <TextView android:id="@+id/tvHomeWins" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/accent" android:textSize="20sp" android:textStyle="bold" android:text="0"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_secondary" android:text=" 승  " />
 
-            <TextView android:id="@+id/tvDraws" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="20sp" android:textStyle="bold" android:text="0"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#888888" android:text=" 무  " />
+            <TextView android:id="@+id/tvDraws" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:text="0"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_secondary" android:text=" 무  " />
 
-            <TextView android:id="@+id/tvAwayWins" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FF4D4D" android:textSize="20sp" android:textStyle="bold" android:text="0"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#888888" android:text=" 승" />
+            <TextView android:id="@+id/tvAwayWins" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/info" android:textSize="20sp" android:textStyle="bold" android:text="0"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_secondary" android:text=" 승" />
         </LinearLayout>
 
         <!-- 🌟 새롭게 추가된 승무패 비율 바 그래프 -->
@@ -48,9 +48,9 @@
             android:weightSum="10"
             android:layout_marginTop="16dp">
 
-            <View android:id="@+id/viewH2HHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" android:background="#20E07A"/>
-            <View android:id="@+id/viewH2HDraw" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" android:background="#888888"/>
-            <View android:id="@+id/viewH2HAway" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" android:background="#FF4D4D"/>
+            <View android:id="@+id/viewH2HHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" android:background="@color/accent"/>
+            <View android:id="@+id/viewH2HDraw" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" android:background="@color/text_secondary"/>
+            <View android:id="@+id/viewH2HAway" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" android:background="@color/info"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -58,7 +58,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="최근 맞대결 목록"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/text_primary"
         android:textSize="16sp"
         android:textStyle="bold"
         android:layout_marginTop="20dp"

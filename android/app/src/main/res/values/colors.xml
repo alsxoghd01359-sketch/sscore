@@ -2,4 +2,29 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 라이트 테마 팔레트. Kotlin 코드의 Color.parseColor 값은 이 값과 맞춰 둔다. -->
+    <color name="bg">#FFFFFF</color>
+    <color name="surface">#F4F5F7</color>
+    <color name="surface_variant">#E6E8EB</color>
+    <color name="divider">#1F000000</color>
+
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_body">#374151</color>
+    <color name="text_muted">#4B5563</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_hint">#9CA3AF</color>
+
+    <!-- 포인트 색상 (주황) -->
+    <color name="accent">#F2711C</color>
+    <color name="accent_tint">#FFF1E6</color>
+    <color name="on_accent">#FFFFFF</color>
+
+    <!-- 의미 색상 -->
+    <color name="positive">#16A34A</color>
+    <color name="negative">#DC2626</color>
+    <color name="warning">#D97706</color>
+    <color name="info">#2563EB</color>
+    <color name="gold">#CA8A04</color>
+    <color name="rating_top">#0891B2</color>
 </resources>

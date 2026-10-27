@@ -19,7 +19,7 @@ class PlayerStubFragment : Fragment() {
     ) = TextView(requireContext()).apply {
         text = "${arguments?.getString("title")} 준비 중"
         gravity = Gravity.CENTER
-        setTextColor(android.graphics.Color.parseColor("#888888"))
+        setTextColor(android.graphics.Color.parseColor("#6B7280"))
         textSize = 14f
     }
 }

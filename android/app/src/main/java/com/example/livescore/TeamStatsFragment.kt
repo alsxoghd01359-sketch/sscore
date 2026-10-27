@@ -109,7 +109,7 @@ class TeamStatsFragment : Fragment() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(48))
             setPadding(dp(16), 0, dp(16), 0)
-            if (selected) setBackgroundColor(Color.parseColor("#1A2E1A"))
+            if (selected) setBackgroundColor(Color.parseColor("#FFF1E6"))
 
             val logo = ImageView(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(dp(22), dp(22))
@@ -127,17 +127,17 @@ class TeamStatsFragment : Fragment() {
             }
             nameCol.addView(TextView(requireContext()).apply {
                 text = leagueIdToName(leagueId); textSize = 12f
-                setTextColor(if (selected) Color.parseColor("#20E07A") else Color.WHITE)
+                setTextColor(if (selected) Color.parseColor("#F2711C") else Color.parseColor("#1A1A1A"))
             })
             nameCol.addView(TextView(requireContext()).apply {
                 text = "$season/${season + 1}"; textSize = 11f
-                setTextColor(if (selected) Color.parseColor("#20E07A") else Color.parseColor("#888888"))
+                setTextColor(if (selected) Color.parseColor("#F2711C") else Color.parseColor("#6B7280"))
             })
             addView(nameCol)
 
             if (selected) addView(TextView(requireContext()).apply {
                 text = "✓"; textSize = 14f
-                setTextColor(Color.parseColor("#20E07A"))
+                setTextColor(Color.parseColor("#F2711C"))
             })
         }
     }
@@ -185,9 +185,9 @@ class TeamStatsFragment : Fragment() {
             val diff = rec.goalsDiff
             tvGoalDiff.text = if (diff > 0) "+$diff" else diff.toString()
             tvGoalDiff.setTextColor(when {
-                diff > 0 -> Color.parseColor("#20E07A")
-                diff < 0 -> Color.parseColor("#FF5555")
-                else     -> Color.WHITE
+                diff > 0 -> Color.parseColor("#F2711C")
+                diff < 0 -> Color.parseColor("#DC2626")
+                else     -> Color.parseColor("#1A1A1A")
             })
             tvPoints.text = rec.points.toString()
         }
@@ -213,7 +213,7 @@ class TeamStatsFragment : Fragment() {
             container.addView(TextView(requireContext()).apply {
                 text = "데이터 없음 (Phase 2 선수 스탯 적재 필요)"
                 textSize = 12f
-                setTextColor(Color.parseColor("#888888"))
+                setTextColor(Color.parseColor("#6B7280"))
                 setPadding(dp(14), dp(14), dp(14), dp(14))
             })
             return

@@ -40,8 +40,8 @@ class StandingsAdapter(
         val isHighlight = s.teamId == currentHomeTeamId || s.teamId == currentAwayTeamId
 
         // 기본 텍스트 색
-        val nameColor = if (isHighlight) Color.parseColor("#20E07A") else Color.WHITE
-        val rowBg     = if (isHighlight) Color.parseColor("#1A2A1A") else Color.TRANSPARENT
+        val nameColor = if (isHighlight) Color.parseColor("#F2711C") else Color.parseColor("#1A1A1A")
+        val rowBg     = if (isHighlight) Color.parseColor("#FFF1E6") else Color.TRANSPARENT
         holder.itemView.setBackgroundColor(rowBg)
 
         holder.tvRank.text   = s.rank.toString()
@@ -62,9 +62,9 @@ class StandingsAdapter(
             else     -> diff.toString()
         }
         holder.tvGoalDiff.setTextColor(when {
-            diff > 0 -> Color.parseColor("#20E07A")
-            diff < 0 -> Color.parseColor("#FF5555")
-            else     -> Color.WHITE
+            diff > 0 -> Color.parseColor("#F2711C")
+            diff < 0 -> Color.parseColor("#DC2626")
+            else     -> Color.parseColor("#1A1A1A")
         })
 
         holder.tvPoints.text = s.points.toString()

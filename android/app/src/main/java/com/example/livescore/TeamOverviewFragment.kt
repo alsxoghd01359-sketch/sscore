@@ -75,7 +75,7 @@ class TeamOverviewFragment : Fragment() {
 
             val bgColor = when (match.result) {
                 "W"  -> Color.parseColor("#1A7A45")
-                "D"  -> Color.parseColor("#555555")
+                "D"  -> Color.parseColor("#9CA3AF")
                 else -> Color.parseColor("#8B1A1A")
             }
             tvResult.background = GradientDrawable().apply {
@@ -101,7 +101,7 @@ class TeamOverviewFragment : Fragment() {
 
         standings.forEach { row ->
             val isMe = row.teamId == focusTeamId
-            val textColor = if (isMe) Color.parseColor("#20E07A") else Color.WHITE
+            val textColor = if (isMe) Color.parseColor("#F2711C") else Color.parseColor("#1A1A1A")
 
             val rowView = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -110,11 +110,11 @@ class TeamOverviewFragment : Fragment() {
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 setPadding(dp(12), dp(11), dp(12), dp(11))
-                if (isMe) setBackgroundColor(Color.parseColor("#1A2E1A"))
+                if (isMe) setBackgroundColor(Color.parseColor("#FFF1E6"))
             }
             rowView.addView(txt(row.rank.toString(),  32, textColor))
             rowView.addView(txt(row.teamName,          0,  textColor, weight = 1f))
-            rowView.addView(txt(row.played.toString(), 36, Color.parseColor("#CCCCCC"), Gravity.CENTER))
+            rowView.addView(txt(row.played.toString(), 36, Color.parseColor("#374151"), Gravity.CENTER))
             rowView.addView(txt(row.points.toString(), 36, textColor, Gravity.CENTER))
             container.addView(rowView)
         }
@@ -142,7 +142,7 @@ class TeamOverviewFragment : Fragment() {
         container.removeAllViews()
 
         if (trophies.isEmpty()) {
-            container.addView(txt("우승 이력 없음", 0, Color.parseColor("#888888"),
+            container.addView(txt("우승 이력 없음", 0, Color.parseColor("#6B7280"),
                 Gravity.CENTER, padding = dp(14)))
             return
         }
@@ -157,7 +157,7 @@ class TeamOverviewFragment : Fragment() {
             }
 
             // 트로피 아이콘
-            row.addView(txt("🏆", 28, Color.WHITE, Gravity.CENTER_VERTICAL, textSize = 18f))
+            row.addView(txt("🏆", 28, Color.parseColor("#1A1A1A"), Gravity.CENTER_VERTICAL, textSize = 18f))
 
             // 리그명 + 국가 (세로)
             val infoCol = LinearLayout(requireContext()).apply {
@@ -165,14 +165,14 @@ class TeamOverviewFragment : Fragment() {
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
                 setPadding(dp(8), 0, 0, 0)
             }
-            infoCol.addView(txt(trophy.league ?: "-", 0, Color.WHITE, textSize = 14f))
+            infoCol.addView(txt(trophy.league ?: "-", 0, Color.parseColor("#1A1A1A"), textSize = 14f))
             if (!trophy.country.isNullOrBlank()) {
-                infoCol.addView(txt(trophy.country, 0, Color.parseColor("#888888"), textSize = 11f))
+                infoCol.addView(txt(trophy.country, 0, Color.parseColor("#6B7280"), textSize = 11f))
             }
             row.addView(infoCol)
 
             // 우승 횟수
-            row.addView(txt("×${trophy.winCount}", 36, Color.parseColor("#20E07A"),
+            row.addView(txt("×${trophy.winCount}", 36, Color.parseColor("#F2711C"),
                 Gravity.CENTER, textSize = 16f, bold = true))
 
             // 마지막 우승 시즌 (세로)
@@ -182,8 +182,8 @@ class TeamOverviewFragment : Fragment() {
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                 gravity = Gravity.END
             }
-            seasonCol.addView(txt("마지막", 0, Color.parseColor("#888888"), Gravity.END, textSize = 10f))
-            seasonCol.addView(txt(trophy.lastWinSeason ?: "-", 0, Color.WHITE, Gravity.END, textSize = 12f))
+            seasonCol.addView(txt("마지막", 0, Color.parseColor("#6B7280"), Gravity.END, textSize = 10f))
+            seasonCol.addView(txt(trophy.lastWinSeason ?: "-", 0, Color.parseColor("#1A1A1A"), Gravity.END, textSize = 12f))
             row.addView(seasonCol)
 
             container.addView(row)
@@ -194,7 +194,7 @@ class TeamOverviewFragment : Fragment() {
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, 1
                     ).also { it.setMargins(dp(14), 0, dp(14), 0) }
-                    setBackgroundColor(Color.parseColor("#333333"))
+                    setBackgroundColor(Color.parseColor("#E6E8EB"))
                 })
             }
         }

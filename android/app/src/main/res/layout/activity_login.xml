@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="#101411"
+    android:background="@color/bg"
     android:padding="24dp">
 
     <!-- 로고 -->
@@ -21,8 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:hint="Email"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#9A9A9A"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_hint"
         android:background="@drawable/edittext_bg"
         android:padding="12dp"
         android:layout_marginBottom="16dp"/>
@@ -33,8 +33,8 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:hint="Password"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#9A9A9A"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_hint"
         android:background="@drawable/edittext_bg"
         android:inputType="textPassword"
         android:padding="12dp"
@@ -46,8 +46,8 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="로그인"
-        android:textColor="#000000"
-        android:backgroundTint="#20E07A"/>
+        android:textColor="@color/on_accent"
+        android:backgroundTint="@color/accent"/>
 
     <!-- 회원가입 버튼 -->
     <TextView
@@ -55,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="회원가입"
-        android:textColor="#9A9A9A"
+        android:textColor="@color/text_hint"
         android:layout_marginTop="16dp"
         android:padding="8dp"/>
 

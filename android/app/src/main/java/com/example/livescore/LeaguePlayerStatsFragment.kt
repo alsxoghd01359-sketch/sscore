@@ -89,7 +89,7 @@ class LeaguePlayerStatsFragment : Fragment() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(14), dp(14), dp(14), dp(14))
-            setBackgroundColor(Color.parseColor("#1C1C1C"))
+            setBackgroundColor(Color.parseColor("#F4F5F7"))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -98,14 +98,14 @@ class LeaguePlayerStatsFragment : Fragment() {
         val tvTitle = TextView(requireContext()).apply {
             text = title
             textSize = 15f
-            setTextColor(Color.WHITE)
+            setTextColor(Color.parseColor("#1A1A1A"))
             setTypeface(null, Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
         val tvArrow = TextView(requireContext()).apply {
             text = "▼"
             textSize = 13f
-            setTextColor(Color.parseColor("#888888"))
+            setTextColor(Color.parseColor("#6B7280"))
         }
         header.addView(tvTitle)
         header.addView(tvArrow)
@@ -114,7 +114,7 @@ class LeaguePlayerStatsFragment : Fragment() {
         // 행 컨테이너
         val rowsBox = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#181818"))
+            setBackgroundColor(Color.parseColor("#F4F5F7"))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -126,7 +126,7 @@ class LeaguePlayerStatsFragment : Fragment() {
             val list = if (showAll) players else players.take(3)
             list.forEachIndexed { idx, p ->
                 if (idx > 0) rowsBox.addView(View(requireContext()).apply {
-                    setBackgroundColor(Color.parseColor("#2A2A2A"))
+                    setBackgroundColor(Color.parseColor("#E6E8EB"))
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, 1
                     ).also { it.setMargins(dp(14), 0, dp(14), 0) }
@@ -141,10 +141,10 @@ class LeaguePlayerStatsFragment : Fragment() {
         val btnMore = TextView(requireContext()).apply {
             text = "전체보기 ▼"
             textSize = 13f
-            setTextColor(Color.parseColor("#888888"))
+            setTextColor(Color.parseColor("#6B7280"))
             gravity = Gravity.CENTER
             setPadding(0, dp(10), 0, dp(10))
-            setBackgroundColor(Color.parseColor("#181818"))
+            setBackgroundColor(Color.parseColor("#F4F5F7"))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -176,7 +176,7 @@ class LeaguePlayerStatsFragment : Fragment() {
         row.addView(TextView(requireContext()).apply {
             text = "$rank"
             textSize = 14f
-            setTextColor(Color.parseColor("#888888"))
+            setTextColor(Color.parseColor("#6B7280"))
             setTypeface(null, Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(dp(30), LinearLayout.LayoutParams.WRAP_CONTENT)
         })
@@ -198,20 +198,20 @@ class LeaguePlayerStatsFragment : Fragment() {
         infoCol.addView(TextView(requireContext()).apply {
             text = p.playerName
             textSize = 14f
-            setTextColor(Color.WHITE)
+            setTextColor(Color.parseColor("#1A1A1A"))
             setTypeface(null, Typeface.BOLD)
         })
         infoCol.addView(TextView(requireContext()).apply {
             text = "${p.appearances}경기"
             textSize = 12f
-            setTextColor(Color.parseColor("#888888"))
+            setTextColor(Color.parseColor("#6B7280"))
         })
         row.addView(infoCol)
         // 값
         row.addView(TextView(requireContext()).apply {
             text = valueStr
             textSize = 16f
-            setTextColor(Color.parseColor("#20E07A"))
+            setTextColor(Color.parseColor("#F2711C"))
             setTypeface(null, Typeface.BOLD)
         })
         return row

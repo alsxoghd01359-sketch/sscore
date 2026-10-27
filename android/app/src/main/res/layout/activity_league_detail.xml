@@ -5,7 +5,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#101411"
+        android:background="@color/bg"
         android:orientation="vertical"
         android:fitsSystemWindows="true">
 
@@ -21,7 +21,7 @@
                 android:layout_height="30dp"
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_arrow_back"
-                app:tint="#FFFFFF"/>
+                app:tint="@color/text_primary"/>
         </RelativeLayout>
 
         <!-- 헤더: 로고(왼쪽) + 리그명/국가(오른쪽) - 구단 상세와 동일 구조 -->
@@ -51,7 +51,7 @@
                     android:id="@+id/tvLeagueName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/text_primary"
                     android:textSize="22sp"
                     android:textStyle="bold"/>
 
@@ -59,7 +59,7 @@
                     android:id="@+id/tvLeagueCountry"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#AAAAAA"
+                    android:textColor="@color/text_muted"
                     android:textSize="14sp"
                     android:layout_marginTop="4dp"/>
             </LinearLayout>
@@ -70,10 +70,10 @@
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#101411"
-            app:tabTextColor="#888888"
-            app:tabSelectedTextColor="#FFFFFF"
-            app:tabIndicatorColor="#20E07A"
+            android:background="@color/bg"
+            app:tabTextColor="@color/text_secondary"
+            app:tabSelectedTextColor="@color/text_primary"
+            app:tabIndicatorColor="@color/accent"
             app:tabIndicatorHeight="3dp"
             app:tabMode="scrollable"
             app:tabGravity="start"/>

@@ -117,7 +117,7 @@ class TeamStandingsFragment : Fragment() {
                 dp(48)
             )
             setPadding(dp(16), 0, dp(16), 0)
-            if (isSelected) setBackgroundColor(Color.parseColor("#1A2E1A"))
+            if (isSelected) setBackgroundColor(Color.parseColor("#FFF1E6"))
 
             // 리그 로고
             val logo = android.widget.ImageView(requireContext()).apply {
@@ -138,12 +138,12 @@ class TeamStandingsFragment : Fragment() {
             val tvName = android.widget.TextView(requireContext()).apply {
                 text = leagueIdToName(leagueId)
                 textSize = 12f
-                setTextColor(if (isSelected) Color.parseColor("#20E07A") else Color.WHITE)
+                setTextColor(if (isSelected) Color.parseColor("#F2711C") else Color.parseColor("#1A1A1A"))
             }
             val tvSeason = android.widget.TextView(requireContext()).apply {
                 text = "$season/${season + 1}"
                 textSize = 11f
-                setTextColor(if (isSelected) Color.parseColor("#20E07A") else Color.parseColor("#888888"))
+                setTextColor(if (isSelected) Color.parseColor("#F2711C") else Color.parseColor("#6B7280"))
             }
             nameCol.addView(tvName)
             nameCol.addView(tvSeason)
@@ -154,7 +154,7 @@ class TeamStandingsFragment : Fragment() {
                 val check = android.widget.TextView(requireContext()).apply {
                     text = "✓"
                     textSize = 14f
-                    setTextColor(Color.parseColor("#20E07A"))
+                    setTextColor(Color.parseColor("#F2711C"))
                 }
                 addView(check)
             }

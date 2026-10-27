@@ -91,8 +91,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateTabUI(selectedTab: TextView, allTabs: List<TextView>) {
-        allTabs.forEach { it.setTextColor(Color.parseColor("#888888")) }
-        selectedTab.setTextColor(Color.parseColor("#20E07A"))
+        allTabs.forEach { it.setTextColor(Color.parseColor("#6B7280")) }
+        selectedTab.setTextColor(Color.parseColor("#F2711C"))
     }
 
     private fun setupCalendar() {
