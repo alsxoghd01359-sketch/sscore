@@ -17,6 +17,7 @@ import com.example.livescore.R
 import com.example.livescore.auth.SessionManager
 import com.example.livescore.auth.logout
 import com.example.livescore.databinding.ActivityProfileBinding
+import com.example.livescore.notification.NotificationSettingsActivity
 import com.example.livescore.search.SearchActivity
 
 // 내 정보: 닉네임 변경, 비밀번호 변경, 로그아웃
@@ -45,6 +46,9 @@ class ProfileActivity : AppCompatActivity() {
         binding.btnWithdraw.setOnClickListener { confirmWithdraw() }
         binding.btnPickTeam.setOnClickListener {
             pickTeam.launch(Intent(this, SearchActivity::class.java).apply { putExtra(SearchActivity.EXTRA_PICK_TEAM, true) })
+        }
+        binding.btnNotificationSettings.setOnClickListener {
+            startActivity(Intent(this, NotificationSettingsActivity::class.java))
         }
         binding.btnClearTeam.setOnClickListener { viewModel.clearSupportedTeam() }
         viewModel.supportedTeamName.observe(this) { name ->

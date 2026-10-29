@@ -47,12 +47,17 @@ class Follow(
     val targetId: Long,
 
     @Column(name = "created_at", nullable = false)
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime,
+
+    // 이 대상의 알림을 받을지 (알림 종류 설정과 함께 모두 켜져 있어야 알림이 나간다)
+    @Column(name = "notify", nullable = false)
+    var notify: Boolean = true
 )
 
 @Repository
 interface FollowRepository : JpaRepository<Follow, Long> {
     fun findByMemberIdOrderByIdAsc(memberId: Int): List<Follow>
+    fun findByMemberIdAndTargetTypeAndTargetId(memberId: Int, targetType: String, targetId: Long): Follow?
     fun existsByMemberIdAndTargetTypeAndTargetId(memberId: Int, targetType: String, targetId: Long): Boolean
     fun deleteByMemberIdAndTargetTypeAndTargetId(memberId: Int, targetType: String, targetId: Long): Long
 }

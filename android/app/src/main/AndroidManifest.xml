@@ -59,6 +59,10 @@
             android:name=".league.LeagueDetailActivity"
             android:exported="false" />
         <activity
+            android:name=".notification.NotificationSettingsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".follow.FollowListActivity"
             android:exported="false" />
 
