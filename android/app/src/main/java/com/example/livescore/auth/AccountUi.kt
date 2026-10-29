@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.livescore.RetrofitClient
 import com.example.livescore.follow.FollowStore
+import com.example.livescore.push.PushRegistrar
 import com.example.livescore.member.ProfileActivity
 import kotlinx.coroutines.launch
 
@@ -15,6 +16,7 @@ class SScoreApp : Application() {
         super.onCreate()
         SessionManager.init(this)
         FollowStore.init()
+        PushRegistrar.init()
     }
 }
 

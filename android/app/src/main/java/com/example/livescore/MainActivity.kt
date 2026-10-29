@@ -22,6 +22,7 @@ import com.example.livescore.auth.requireLogin
 import com.example.livescore.auth.showAccountMenu
 import com.example.livescore.follow.FollowListActivity
 import com.example.livescore.follow.FollowStore
+import com.example.livescore.push.requestNotificationPermissionWhenLoggedIn
 import com.example.livescore.databinding.ActivityMainBinding
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         setupCalendar()
         updateCalendarButtonText()
         setupAccount()
+        requestNotificationPermissionWhenLoggedIn()
 
         binding.errorView.btnRetry.setOnClickListener { viewModel.retry() }
         viewModel.state.observe(this) { state ->

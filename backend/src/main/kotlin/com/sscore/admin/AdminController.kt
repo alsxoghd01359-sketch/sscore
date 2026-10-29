@@ -2,6 +2,8 @@ package com.sscore.admin
 
 import com.sscore.football.SeasonResolver
 import com.sscore.league.LeagueCatalog
+import com.sscore.push.PushMessage
+import com.sscore.push.PushService
 import com.sscore.service.BulkHistoricalInitService
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,9 +21,15 @@ class AdminController(
     private val seasons: SeasonResolver,
     private val catalog: LeagueCatalog,
     private val bulkInitService: BulkHistoricalInitService,
-    private val plHistorySeed: PremierLeagueHistorySeed
+    private val plHistorySeed: PremierLeagueHistorySeed,
+    private val push: PushService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
+
+    /** 회원의 모든 기기로 테스트 푸시를 보낸다 (푸시 설정이 제대로 됐는지 확인용). 보낸 기기 수를 돌려준다. */
+    @PostMapping("/push/test")
+    fun testPush(@RequestParam memberId: Int, @RequestParam(defaultValue = "SScore 테스트 알림") title: String): Map<String, Int> =
+        mapOf("sentDevices" to push.sendToMember(memberId, PushMessage(title, "푸시가 정상적으로 도착했습니다.")))
 
     /** 시즌 범위의 경기 데이터를 외부 API에서 받아 적재 */
     @PostMapping("/matches/load")

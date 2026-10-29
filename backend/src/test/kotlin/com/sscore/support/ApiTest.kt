@@ -17,11 +17,11 @@ import org.testcontainers.mysql.MySQLContainer
 // - 외부 축구 API: 앱이 쓰는 RestTemplate에 MockRestServiceServer를 붙여 응답을 흉내 낸다 (footballApi)
 // - 시간: MutableClock으로 앞당긴다 (clock)
 // - 메일: FakeMailPort가 나간 인증코드를 모아 둔다 (mail)
-// - 푸시: 푸시 기반 티켓(19)에서 같은 방식으로 가짜를 추가한다
+// - 푸시: FakePushPort가 나간 푸시를 모아 둔다 (push)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestClockConfig::class, FakeMailConfig::class)
+@Import(TestClockConfig::class, FakeMailConfig::class, FakePushConfig::class)
 @Testcontainers
 abstract class ApiTest {
 
@@ -33,6 +33,9 @@ abstract class ApiTest {
 
     @Autowired
     protected lateinit var mail: FakeMailPort
+
+    @Autowired
+    protected lateinit var push: FakePushPort
 
     @Autowired
     private lateinit var matchDetails: com.sscore.match.MatchDetailService
@@ -52,6 +55,7 @@ abstract class ApiTest {
     fun resetFakes() {
         footballApi = MockRestServiceServer.bindTo(restTemplate).build()
         mail.clear()
+        push.clear()
         matchDetails.clearCaches()
         clock.set(MutableClock.START)   // 스프링 컨텍스트가 테스트 클래스끼리 공유되므로 시계도 매번 처음으로 되돌린다
     }

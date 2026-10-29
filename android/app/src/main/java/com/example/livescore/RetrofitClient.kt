@@ -2,6 +2,7 @@ package com.example.livescore
 
 import com.example.livescore.follow.FollowApi
 import com.example.livescore.notification.NotificationApi
+import com.example.livescore.push.PushApi
 import com.example.livescore.auth.AuthApi
 import com.example.livescore.auth.AuthInterceptor
 import com.example.livescore.auth.AuthRepository
@@ -56,4 +57,6 @@ object RetrofitClient {
     val followApi: FollowApi by lazy { retrofit(authedClient).create(FollowApi::class.java) }
 
     val notificationApi: NotificationApi by lazy { retrofit(authedClient).create(NotificationApi::class.java) }
+
+    val pushApi: PushApi by lazy { retrofit(authedClient).create(PushApi::class.java) }
 }
