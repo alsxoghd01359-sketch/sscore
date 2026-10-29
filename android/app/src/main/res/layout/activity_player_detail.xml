@@ -22,6 +22,20 @@
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_arrow_back"
                 app:tint="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/btnFollow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_follow_off"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
+                android:textColor="@color/accent"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <!-- 헤더: 프로필 사진(왼쪽) + 이름/소속팀(오른쪽) -->

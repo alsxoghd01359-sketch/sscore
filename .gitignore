@@ -12,3 +12,7 @@ local.properties
 
 # DB 데이터 덤프 (GitHub에 올리지 않음)
 db/data/
+
+# Firebase service account key (secret)
+backend/firebase-service-account.json
+backend/*-firebase-adminsdk-*.json

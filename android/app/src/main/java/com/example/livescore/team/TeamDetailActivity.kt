@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.bumptech.glide.Glide
 import com.example.livescore.databinding.ActivityTeamDetailBinding
+import com.example.livescore.follow.FollowedTeamData
+import com.example.livescore.follow.bindTeamFollow
 import com.google.android.material.tabs.TabLayoutMediator
 
 // 팀 상세: 개요 · 경기 · 순위 · 통계 · 스쿼드 탭
@@ -42,6 +44,10 @@ class TeamDetailActivity : AppCompatActivity() {
         }.attach()
 
         binding.btnBack.setOnClickListener { finish() }
+        bindTeamFollow(
+            binding.btnFollow,
+            FollowedTeamData(viewModel.teamId, binding.tvTeamName.text.toString(), "https://media.api-sports.io/football/teams/${viewModel.teamId}.png")
+        )
 
         // 인텐트에 리그 이름이 없었다면 서버가 알려 준 소속 리그 이름을 보여 준다
         viewModel.info.observe(this) { info ->

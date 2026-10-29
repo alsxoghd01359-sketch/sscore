@@ -18,6 +18,8 @@ import com.example.livescore.RetrofitClient
 import com.example.livescore.common.SimpleLoader
 import com.example.livescore.common.UiState
 import com.example.livescore.databinding.ActivityPlayerDetailBinding
+import com.example.livescore.follow.FollowedPlayerData
+import com.example.livescore.follow.bindPlayerFollow
 import com.google.android.material.tabs.TabLayoutMediator
 
 // 선수 상세 화면 전체(헤더 + 3개 탭)가 공유하는 상태. 선수 세부 정보는 헤더와 프로필 탭이 같이 쓴다.
@@ -68,6 +70,7 @@ class PlayerDetailActivity : AppCompatActivity() {
             if (state is UiState.Success) {
                 val d = state.data
                 binding.tvPlayerName.text = d.name
+                bindPlayerFollow(binding.btnFollow, FollowedPlayerData(viewModel.playerId, d.name, d.photoUrl))
                 binding.tvPlayerTeam.text = d.currentTeamName ?: ""
                 Glide.with(this)
                     .load(d.photoUrl)

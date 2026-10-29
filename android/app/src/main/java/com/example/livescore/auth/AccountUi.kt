@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.livescore.RetrofitClient
+import com.example.livescore.follow.FollowStore
 import com.example.livescore.member.ProfileActivity
 import kotlinx.coroutines.launch
 
@@ -13,6 +14,7 @@ class SScoreApp : Application() {
     override fun onCreate() {
         super.onCreate()
         SessionManager.init(this)
+        FollowStore.init()
     }
 }
 

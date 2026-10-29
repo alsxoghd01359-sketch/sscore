@@ -18,7 +18,10 @@ import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import com.example.livescore.auth.SessionManager
+import com.example.livescore.auth.requireLogin
 import com.example.livescore.auth.showAccountMenu
+import com.example.livescore.follow.FollowListActivity
+import com.example.livescore.follow.FollowStore
 import com.example.livescore.databinding.ActivityMainBinding
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -34,6 +37,8 @@ class MainActivity : AppCompatActivity() {
 
     private var selectedDate: LocalDate = LocalDate.now()
     private var currentLeagueId: Int? = null
+    private var followOnly = false              // "팔로우" 탭: 팔로우한 팀의 경기만
+    private var loadedMatches: List<MatchData> = emptyList()
     private var currentPosition: Int = Int.MAX_VALUE / 2
 
     private val viewModel: HomeMatchesViewModel by viewModels()
@@ -51,8 +56,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.errorView.btnRetry.setOnClickListener { viewModel.retry() }
         viewModel.state.observe(this) { state ->
-            renderState(state, binding.pbLoading, binding.errorView) { matchAdapter.updateData(it) }
+            renderState(state, binding.pbLoading, binding.errorView) { loadedMatches = it; showMatches() }
         }
+        FollowStore.follows.observe(this) { showMatches() }
         loadMatchesForDate()   // 오늘 날짜로 첫 로드
         startLiveRefresh()
     }
@@ -67,6 +73,15 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    // 팔로우 탭이면 팔로우한 팀이 뛰는 경기만 보여 준다
+    private fun showMatches() {
+        val shown = if (followOnly) {
+            val ids = FollowStore.follows.value?.teams?.map { it.id }?.toSet().orEmpty()
+            loadedMatches.filter { it.homeTeamId in ids || it.awayTeamId in ids }
+        } else loadedMatches
+        matchAdapter.updateData(shown)
     }
 
     // 헤더 계정 버튼: 게스트는 "로그인", 회원은 닉네임을 보여 준다
@@ -113,15 +128,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupLeagueTabs() {
         val tabs = listOf(
-            binding.tabAll, binding.tabEpl, binding.tabLaLiga,
+            binding.tabAll, binding.tabFollow, binding.tabEpl, binding.tabLaLiga,
             binding.tabSerieA, binding.tabBundesliga, binding.tabLigue1
         )
         fun select(tab: TextView, leagueId: Int?) {
             updateTabUI(tab, tabs)
             currentLeagueId = leagueId
+            followOnly = tab === binding.tabFollow
             loadMatchesForDate()
+            showMatches()
         }
         binding.tabAll.setOnClickListener       { select(binding.tabAll,        null) }
+        binding.tabFollow.setOnClickListener    { requireLogin { select(binding.tabFollow, null) } }
         binding.tabEpl.setOnClickListener       { select(binding.tabEpl,        39)   }
         binding.tabLaLiga.setOnClickListener    { select(binding.tabLaLiga,     140)  }
         binding.tabSerieA.setOnClickListener    { select(binding.tabSerieA,     135)  }
@@ -137,6 +155,9 @@ class MainActivity : AppCompatActivity() {
     private fun setupCalendar() {
         binding.navSearch.setOnClickListener {
             startActivity(Intent(this, SearchActivity::class.java))
+        }
+        binding.navFollow.setOnClickListener {
+            requireLogin { startActivity(Intent(this, FollowListActivity::class.java)) }
         }
         binding.btnCalendar.setOnClickListener {
             DatePickerDialog(this,

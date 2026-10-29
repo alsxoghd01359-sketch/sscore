@@ -1,5 +1,6 @@
 package com.example.livescore
 
+import com.example.livescore.follow.FollowApi
 import com.example.livescore.auth.AuthApi
 import com.example.livescore.auth.AuthInterceptor
 import com.example.livescore.auth.AuthRepository
@@ -50,4 +51,6 @@ object RetrofitClient {
     val searchApi: SearchApi by lazy { retrofit(authedClient).create(SearchApi::class.java) }
 
     val matchApi: MatchApi by lazy { retrofit(authedClient).create(MatchApi::class.java) }
+
+    val followApi: FollowApi by lazy { retrofit(authedClient).create(FollowApi::class.java) }
 }
