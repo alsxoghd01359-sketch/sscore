@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.livescore.databinding.FragmentLeagueStandingsBinding
 import com.example.livescore.*
 import com.example.livescore.common.renderState
+import com.example.livescore.team.TeamDetailActivity
 
 class LeagueStandingsFragment : Fragment() {
 

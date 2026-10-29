@@ -10,6 +10,17 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <ProgressBar
+            android:id="@+id/pbLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" />
+
+        <include android:id="@+id/errorView" layout="@layout/view_error"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
         <!-- ① 최근 5경기 -->
         <TextView
             android:layout_width="wrap_content"

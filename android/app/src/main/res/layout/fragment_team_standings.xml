@@ -131,6 +131,10 @@
         android:layout_gravity="center_horizontal"
         android:visibility="gone" />
 
+    <include android:id="@+id/errorView" layout="@layout/view_error"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
     <!-- 순위표 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTeamStandings"

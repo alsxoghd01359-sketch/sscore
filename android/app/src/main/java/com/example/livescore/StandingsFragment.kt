@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.livescore.databinding.FragmentStandingsBinding
 import retrofit2.*
+import com.example.livescore.team.TeamDetailActivity
 
 class StandingsFragment : Fragment() {
     private var _binding: FragmentStandingsBinding? = null

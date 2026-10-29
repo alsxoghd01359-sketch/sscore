@@ -2,15 +2,13 @@ package com.sscore.controller
 
 import com.sscore.entity.PlayerSeasonStatEntity
 import com.sscore.dto.*
-import com.sscore.football.SeasonResolver
 import com.sscore.service.SoccerService
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/soccer")
 class SoccerController(
-    private val soccerService: SoccerService,
-    private val seasons: SeasonResolver
+    private val soccerService: SoccerService
 ) {
 
     // 1. 전체 경기 데이터 DB에서 가져오기
@@ -72,44 +70,10 @@ class SoccerController(
     fun getPlayerProfile(@PathVariable playerId: Long): PlayerProfileDto? =
         soccerService.getPlayerProfile(playerId)
 
-    /** 구단 트로피 전체 목록 (DB champions 테이블) */
-    @GetMapping("/team/{teamId}/trophies")
-    fun getTeamTrophies(@PathVariable teamId: Int): List<TrophyDto> =
-        soccerService.getTeamTrophies(teamId)
-
-    /** 구단 현재 스쿼드 */
-    @GetMapping("/team/{teamId}/squad")
-    fun getTeamSquad(@PathVariable teamId: Int): SquadDto =
-        soccerService.getTeamSquad(teamId)
-
     /** 선수 경기 스탯 */
     @GetMapping("/player/{playerId}/match-stats")
     fun getPlayerMatchStats(
         @PathVariable playerId: Long,
         @RequestParam fixtureId: Long
     ): PlayerMatchStatDto? = soccerService.getPlayerMatchStats(playerId, fixtureId)
-
-    /** 구단 통계: 홈/원정 성적 + 평점/득점/도움 랭킹 */
-    @GetMapping("/team/{teamId}/stats")
-    fun getTeamStats(
-        @PathVariable teamId:  Int,
-        @RequestParam leagueId: Int,
-        @RequestParam(required = false) season: Int?
-    ): TeamStatsDto = soccerService.getTeamStats(teamId, leagueId, seasons.resolve(season))
-
-    /** 구단 경기 목록 (페이지네이션, 최신순) */
-    @GetMapping("/team/{teamId}/matches")
-    fun getTeamMatches(
-        @PathVariable teamId: Int,
-        @RequestParam(defaultValue = "0")  page: Int,
-        @RequestParam(defaultValue = "15") size: Int
-    ): TeamMatchesPageDto = soccerService.getTeamMatches(teamId, page, size)
-
-    /** 구단 개요: 최근 5경기 + 미니순위 + 경기장 + 리그트로피 */
-    @GetMapping("/team/{teamId}/overview")
-    fun getTeamOverview(
-        @PathVariable teamId: Int,
-        @RequestParam leagueId: Int,
-        @RequestParam(required = false) season: Int?
-    ): TeamOverviewDto = soccerService.getTeamOverview(teamId, leagueId, seasons.resolve(season))
 }

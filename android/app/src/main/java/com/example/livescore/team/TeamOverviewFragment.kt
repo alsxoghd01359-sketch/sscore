@@ -1,4 +1,4 @@
-package com.example.livescore
+package com.example.livescore.team
 
 import android.graphics.Color
 import android.graphics.Typeface
@@ -14,51 +14,35 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.livescore.databinding.FragmentTeamOverviewBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.*
+import com.example.livescore.common.renderState
 
 class TeamOverviewFragment : Fragment() {
 
     private var _binding: FragmentTeamOverviewBinding? = null
     private val binding get() = _binding!!
-
-    companion object {
-        fun newInstance(teamId: Int, teamName: String, leagueId: Int, season: Int) =
-            TeamOverviewFragment().apply {
-                arguments = Bundle().apply {
-                    putInt("teamId", teamId)
-                    putString("teamName", teamName)
-                    putInt("leagueId", leagueId)
-                    putInt("season", season)
-                }
-            }
-    }
+    private lateinit var vm: TeamDetailViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTeamOverviewBinding.inflate(inflater, container, false)
-        val teamId   = arguments?.getInt("teamId")   ?: return binding.root
-        val leagueId = arguments?.getInt("leagueId") ?: return binding.root
-        val season   = arguments?.getInt("season")   ?: return binding.root
-        loadOverview(teamId, leagueId, season)
         return binding.root
     }
 
-    private fun loadOverview(teamId: Int, leagueId: Int, season: Int) {
-        RetrofitClient.apiService.getTeamOverview(teamId, leagueId, season)
-            .enqueue(object : Callback<TeamOverviewData> {
-                override fun onResponse(call: Call<TeamOverviewData>, response: Response<TeamOverviewData>) {
-                    if (!isAdded || _binding == null) return
-                    val data = response.body() ?: return
-                    renderRecentMatches(data.recentMatches, teamId)
-                    renderMiniStandings(data.miniStandings, teamId)
-                    renderVenue(data.venue)
-                    renderTrophies(data.leagueTrophies)
-                }
-                override fun onFailure(call: Call<TeamOverviewData>, t: Throwable) {}
-            })
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        vm = teamViewModel()
+        binding.errorView.btnRetry.setOnClickListener { vm.retry(vm.overview) }
+        vm.selectedSeason.observe(viewLifecycleOwner) { season -> if (season != null) vm.overview.load(season) }
+        vm.overview.state.observe(viewLifecycleOwner) { state ->
+            renderState(state, binding.pbLoading, binding.errorView) { data ->
+                renderRecentMatches(data.recentMatches, vm.teamId)
+                renderMiniStandings(data.miniStandings, vm.teamId)
+                renderVenue(data.venue)
+                renderTrophies(data.leagueTrophies)
+            }
+        }
     }
 
     // ─── ① 최근 5경기 ──────────────────────────────────────────────

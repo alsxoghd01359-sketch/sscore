@@ -50,36 +50,10 @@ interface ApiService {
     @GET("/api/soccer/player/{playerId}/profile")
     fun getPlayerProfile(@Path("playerId") playerId: Long): Call<PlayerProfileData>
 
-    @GET("/api/soccer/team/{teamId}/trophies")
-    fun getTeamTrophies(@Path("teamId") teamId: Int): Call<List<TrophyData>>
-
-    @GET("/api/soccer/team/{teamId}/squad")
-    fun getTeamSquad(@Path("teamId") teamId: Int): Call<SquadData>
-
     @GET("/api/soccer/player/{playerId}/match-stats")
     fun getPlayerMatchStats(
         @Path("playerId")   playerId:  Long,
         @Query("fixtureId") fixtureId: Long
     ): Call<PlayerMatchStatData>
 
-    @GET("/api/soccer/team/{teamId}/stats")
-    fun getTeamStats(
-        @Path("teamId")    teamId:   Int,
-        @Query("leagueId") leagueId: Int,
-        @Query("season")   season:   Int
-    ): Call<TeamStatsData>
-
-    @GET("/api/soccer/team/{teamId}/matches")
-    fun getTeamMatches(
-        @Path("teamId") teamId: Int,
-        @Query("page")  page:   Int,
-        @Query("size")  size:   Int = 15
-    ): Call<TeamMatchesPageData>
-
-    @GET("/api/soccer/team/{teamId}/overview")
-    fun getTeamOverview(
-        @Path("teamId")    teamId:   Int,
-        @Query("leagueId") leagueId: Int,
-        @Query("season")   season:   Int
-    ): Call<TeamOverviewData>
 }

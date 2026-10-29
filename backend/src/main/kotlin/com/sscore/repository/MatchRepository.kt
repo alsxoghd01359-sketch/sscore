@@ -28,17 +28,18 @@ interface MatchRepository : JpaRepository<MatchEntity, Long> {
 
     fun findByMatchDateAndLeagueId(matchDate: String, leagueId: Int): List<MatchEntity>
 
-    // 팀+시즌 경기 (빅5 리그만)
+    // 팀+시즌 경기 (지원 리그만)
     @Query("""
         SELECT m FROM MatchEntity m
         WHERE (m.homeTeamId = :teamId OR m.awayTeamId = :teamId)
           AND m.season = :season
-          AND m.leagueId IN (39, 140, 78, 135, 61)
+          AND m.leagueId IN :leagueIds
         ORDER BY m.matchDate ASC, m.matchTime ASC
     """)
     fun findByTeamAndSeason(
         @Param("teamId") teamId: Int,
-        @Param("season") season: Int
+        @Param("season") season: Int,
+        @Param("leagueIds") leagueIds: Collection<Int>
     ): List<MatchEntity>
 
     // 팀의 리그 ID 조회 (최신 시즌 기준)

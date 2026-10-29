@@ -7,6 +7,7 @@ import com.example.livescore.databinding.ActivityMatchDetailBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.example.livescore.team.TeamDetailActivity
 
 class MatchDetailActivity : AppCompatActivity() {
 

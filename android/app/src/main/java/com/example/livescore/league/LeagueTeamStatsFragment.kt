@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.example.livescore.databinding.FragmentLeagueTeamStatsBinding
 import com.example.livescore.*
 import com.example.livescore.common.renderState
+import com.example.livescore.team.TeamDetailActivity
 
 class LeagueTeamStatsFragment : Fragment() {
 

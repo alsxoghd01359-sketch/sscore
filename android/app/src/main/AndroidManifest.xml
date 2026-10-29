@@ -50,7 +50,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".TeamDetailActivity"
+            android:name=".team.TeamDetailActivity"
             android:exported="false" />
         <activity
             android:name=".PlayerDetailActivity"

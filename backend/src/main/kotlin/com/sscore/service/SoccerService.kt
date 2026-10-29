@@ -17,7 +17,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.sscore.football.SeasonResolver
 import com.sscore.league.LeagueCatalog
-import com.sscore.common.ApiException
+import com.sscore.dto.toMatchDto
+import com.sscore.football.optionalExternal
 
 @Service
 class SoccerService(
@@ -65,21 +66,7 @@ class SoccerService(
             .map { it.toDto() }
     }
 
-    private fun MatchEntity.toDto() = MatchDto(
-        fixtureId  = fixtureId,
-        homeTeam   = homeTeam,
-        awayTeam   = awayTeam,
-        homeTeamId = homeTeamId,
-        awayTeamId = awayTeamId,
-        matchDate  = matchDate,
-        matchTime  = matchTime,
-        score      = score,
-        season     = season,
-        leagueId   = leagueId,
-        matchRound = matchRound,
-        stadium    = stadium,
-        referee    = referee
-    )
+    private fun MatchEntity.toDto() = toMatchDto()
 
     // 시즌별로 외부 API에서 받은 경기를 저장한다. 외부 API 오류가 나면 그 시즌부터 중단하고 오류를 그대로 올린다(앞 시즌 저장분은 유지).
     fun saveSeasonsRange(start: Int, end: Int) {
@@ -109,15 +96,6 @@ class SoccerService(
             matchRepository.saveAll(entities)
         }
     }
-
-    // 화면의 부가 정보처럼 없어도 되는 외부 API 조회. 실패하면 이유를 로그에 남기고 기본값으로 대신한다.
-    private fun <T> optionalExternal(what: String, fallback: T, block: () -> T): T =
-        try {
-            block()
-        } catch (e: ApiException) {
-            log.warn("{} 조회 실패, 생략합니다: {}", what, e.message)
-            fallback
-        }
 
     fun getLineups(fixtureId: Long): List<LineupDto> = apiService.fetchLineups(fixtureId)
     fun getPlayerCareerHistory(playerId: Long): List<PlayerSeasonStatEntity> = emptyList()
@@ -154,7 +132,7 @@ class SoccerService(
         val team = teamRepository.findAll().find { it.name == latestStat.teamName }
             ?: player.team ?: return emptyList()
 
-        val matches = matchRepository.findByTeamAndSeason(team.teamId, season)
+        val matches = matchRepository.findByTeamAndSeason(team.teamId, season, leagueCatalog.ids())
         val allPlayerStats = playerStatRepository.findByPlayerId(playerId)
             .associateBy { it.fixtureId }
 
@@ -225,7 +203,7 @@ class SoccerService(
                 // 해당 시즌+팀의 경기 fixtureId 목록
                 val teamEntity = teamRepository.findAll().find { it.name == s.teamName }
                 val fixtureIds = if (teamEntity != null)
-                    matchRepository.findByTeamAndSeason(teamEntity.teamId, s.season)
+                    matchRepository.findByTeamAndSeason(teamEntity.teamId, s.season, leagueCatalog.ids())
                         .mapNotNull { it.fixtureId }.toSet()
                 else emptySet()
 
@@ -380,7 +358,7 @@ class SoccerService(
     }
 
     fun importMatchEventsForTeam(teamId: Int, season: Int): String {
-        val matches = matchRepository.findByTeamAndSeason(teamId, season)
+        val matches = matchRepository.findByTeamAndSeason(teamId, season, leagueCatalog.ids())
         var imported = 0; var skipped = 0; var failed = 0
         matches.forEach { m ->
             val fid = m.fixtureId ?: return@forEach
@@ -589,171 +567,6 @@ class SoccerService(
             currentTeamName = player.team?.name,
             careerStats     = careerStats
         )
-    }
-
-    fun getTeamTrophies(teamId: Int): List<TrophyDto> {
-        return championRepository.findByTeamId(teamId)
-            .groupBy { it.leagueId }
-            .map { (lid, entries) ->
-                val sorted = entries.sortedByDescending { it.season }
-                TrophyDto(
-                    league        = leagueCatalog.nameKo(lid),
-                    country       = null,
-                    winCount      = entries.size,
-                    lastWinSeason = "${sorted.first().season}/${(sorted.first().season + 1).toString().takeLast(2)}"
-                )
-            }
-            .sortedByDescending { it.winCount }
-    }
-
-    fun getTeamSquad(teamId: Int): SquadDto {
-        val players = apiService.fetchTeamSquad(teamId)
-
-        // DB에서 국적 보완
-        val dbMap = playerRepository.findAllById(players.map { it.playerId }.toSet())
-            .associateBy { it.playerId }
-
-        val enriched = players.map { p ->
-            p.copy(nationality = p.nationality ?: dbMap[p.playerId]?.nationality)
-        }
-
-        fun group(pos: String) = enriched
-            .filter { it.position.contains(pos, ignoreCase = true) }
-            .sortedBy { it.number ?: 99 }
-
-        return SquadDto(
-            goalkeepers = group("Goalkeeper"),
-            defenders   = group("Defender"),
-            midfielders = group("Midfielder"),
-            attackers   = group("Attacker")
-        )
-    }
-
-    fun getTeamStats(teamId: Int, leagueId: Int, season: Int): TeamStatsDto {
-        // 홈/원정 성적
-        val (home, away) = optionalExternal("홈/원정 성적(teamId=$teamId)", Pair(null, null)) {
-            apiService.fetchTeamRecord(teamId, leagueId, season)
-        }
-
-        // 팀 이름 조회 (playerSeasonStat은 teamName 기준으로 저장됨)
-        val teamName = teamRepository.findById(teamId).orElse(null)?.name
-            ?: return TeamStatsDto(home, away, emptyList(), emptyList(), emptyList())
-
-        // PL+CL 등 중복 기록이 있는 선수는 출장수가 가장 많은 기록(주 리그)만 사용
-        val stats = playerSeasonStatRepository.findBySeasonAndTeamName(season, teamName)
-            .groupBy { it.playerId }
-            .mapValues { (_, entries) -> entries.maxByOrNull { it.appearances }!! }
-            .values.toList()
-        if (stats.isEmpty()) return TeamStatsDto(home, away, emptyList(), emptyList(), emptyList())
-
-        // playerId → PlayerEntity 맵
-        val playerIds = stats.map { it.playerId }.toSet()
-        val playerMap = playerRepository.findAllById(playerIds).associateBy { it.playerId }
-
-        fun buildRanking(
-            selector: (PlayerSeasonStatEntity) -> Double,
-            minValue: Double = 0.0,
-            minAppearances: Int = 1  // 최소 출장 수 미달 시 랭킹 제외
-        ): List<PlayerRankDto> {
-            val sorted = stats
-                .filter { selector(it) > minValue && it.appearances >= minAppearances }
-                .sortedByDescending { selector(it) }
-            var currentRank = 1
-            return sorted.mapIndexed { idx, s ->
-                if (idx > 0 && selector(s) != selector(sorted[idx - 1])) currentRank = idx + 1
-                val p = playerMap[s.playerId]
-                PlayerRankDto(
-                    rank        = currentRank,
-                    playerId    = s.playerId,
-                    playerName  = p?.name ?: "Unknown",
-                    photoUrl    = p?.photoUrl,
-                    value       = selector(s),
-                    appearances = s.appearances
-                )
-            }
-        }
-
-        return TeamStatsDto(
-            homeRecord    = home,
-            awayRecord    = away,
-            ratingRanking = buildRanking({ it.rating ?: 0.0 }, 0.0, minAppearances = 15),
-            goalRanking   = buildRanking({ it.goals.toDouble() },    minAppearances = 1),
-            assistRanking = buildRanking({ it.assists.toDouble() },  minAppearances = 1)
-        )
-    }
-
-    fun getTeamMatches(teamId: Int, page: Int, size: Int = 15): TeamMatchesPageDto {
-        val pageable = PageRequest.of(
-            page, size,
-            Sort.by(Sort.Direction.DESC, "matchDate").and(Sort.by(Sort.Direction.DESC, "matchTime"))
-        )
-        val result = matchRepository.findAllMatchesByTeam(teamId, pageable)
-        return TeamMatchesPageDto(
-            matches     = result.content.map { it.toDto() },
-            hasMore     = !result.isLast,
-            currentPage = page,
-            totalPages  = result.totalPages
-        )
-    }
-
-    fun getTeamOverview(teamId: Int, leagueId: Int, season: Int): TeamOverviewDto {
-        // 1. 최근 5경기 (종료된 경기만)
-        val recentEntities = matchRepository.findRecentFinishedByTeam(
-            teamId, PageRequest.of(0, 5)
-        )
-        val recentMatches = recentEntities.map { m ->
-            val parts      = m.score.split("-")
-            val homeScore  = parts.getOrNull(0)?.trim()?.toIntOrNull() ?: 0
-            val awayScore  = parts.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
-            val isHome     = m.homeTeamId == teamId
-            val myScore    = if (isHome) homeScore else awayScore
-            val oppScore   = if (isHome) awayScore else homeScore
-            val result     = when {
-                myScore > oppScore  -> "W"
-                myScore == oppScore -> "D"
-                else                -> "L"
-            }
-            RecentMatchDto(
-                fixtureId  = m.fixtureId,
-                homeTeamId = m.homeTeamId,
-                awayTeamId = m.awayTeamId,
-                homeTeam   = m.homeTeam,
-                awayTeam   = m.awayTeam,
-                score      = m.score,
-                result     = result,
-                matchDate  = m.matchDate
-            )
-        }
-
-        // 2. 미니 순위표 (해당팀 ±1)
-        val allStandings = optionalExternal("미니 순위표(leagueId=$leagueId)", emptyList()) {
-            apiService.fetchStandings(leagueId, season)
-        }
-        val teamRank     = allStandings.find { it.teamId == teamId }?.rank ?: 0
-        val miniStandings = if (teamRank > 0)
-            allStandings.filter { it.rank in (teamRank - 1)..(teamRank + 1) }
-        else emptyList()
-
-        // 3. 경기장 정보
-        val venue = optionalExternal("경기장 정보(teamId=$teamId)", null) { apiService.fetchTeamVenue(teamId) }
-
-        // 4. 리그 트로피 (champions 테이블에서 조회)
-        val trophies = championRepository.findByTeamId(teamId)
-            .groupBy { it.leagueId }
-            .map { (leagueId, entries) ->
-                val sorted = entries.sortedByDescending { it.season }
-                TrophyDto(
-                    league        = sorted.first().teamName.let {
-                        leagueCatalog.nameKo(leagueId)
-                    },
-                    country       = null,
-                    winCount      = entries.size,
-                    lastWinSeason = "${sorted.first().season}/${(sorted.first().season + 1).toString().takeLast(2)}"
-                )
-            }
-            .sortedByDescending { it.winCount }
-
-        return TeamOverviewDto(recentMatches, miniStandings, venue, trophies)
     }
 
     // 🌟 추가된 H2H 로직
