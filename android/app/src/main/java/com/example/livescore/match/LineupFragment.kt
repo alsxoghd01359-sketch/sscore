@@ -1,4 +1,6 @@
-package com.example.livescore
+package com.example.livescore.match
+
+import com.example.livescore.*
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,9 +13,8 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.livescore.databinding.FragmentLineupBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.common.StateHost
+import com.example.livescore.common.UiState
 import kotlin.math.max
 import com.example.livescore.player.PlayerMatchStatsDialog
 
@@ -22,8 +23,8 @@ class LineupFragment : Fragment() {
     private var _binding: FragmentLineupBinding? = null
     private val binding get() = _binding!!
 
-    private var lineupData:   List<LineupData>? = null
-    private var matchInfoData: MatchInfoData?   = null
+    private lateinit var host: StateHost
+    private var ratings: Map<Long, Double> = emptyMap()
 
     private val substOutMap = mutableMapOf<String, SubstInfo>()
     private val substInMap  = mutableMapOf<String, SubstInfo>()
@@ -37,56 +38,35 @@ class LineupFragment : Fragment() {
     ): View {
         _binding  = FragmentLineupBinding.inflate(inflater, container, false)
         fixtureId = arguments?.getLong("fixtureId") ?: -1L
-        if (fixtureId != -1L) {
-            loadLineup(fixtureId)
-            loadEvents(fixtureId)
+        host = StateHost(requireContext(), binding.root)
+        return host.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val vm = matchDetailViewModel()
+        host.onRetry { vm.lineups.retry() }
+        // 라인업이 화면의 주인공이고, 경기 정보(교체·평점)는 도착하는 대로 덧붙인다 (정보가 실패해도 라인업은 보인다)
+        vm.lineups.state.observe(viewLifecycleOwner) { render(vm) }
+        vm.info.state.observe(viewLifecycleOwner) { render(vm) }
+        vm.lineups.ensureLoaded()
+        vm.info.ensureLoaded()
+    }
+
+    private fun render(vm: MatchDetailViewModel) {
+        val info = (vm.info.state.value as? UiState.Success)?.data
+        host.render(vm.lineups.state.value ?: UiState.Loading) { lineups ->
+            if (lineups.size < 2) {
+                binding.tvTargetTeamName.text = "라인업이 아직 발표되지 않았습니다"
+                binding.tvFormation.text = ""
+                binding.pitchContainer.removeAllViews()
+                binding.substitutesContainer.removeAllViews()
+                return@render
+            }
+            ratings = info?.playerRatings ?: emptyMap()
+            buildSubstMaps(info?.events ?: emptyList())
+            renderFullMatchLineup(lineups[0], lineups[1])
         }
-        return binding.root
-    }
-
-    // ── 라인업 로드 ───────────────────────────────────────────
-    private fun loadLineup(fixtureId: Long) {
-        RetrofitClient.apiService.getLineups(fixtureId)
-            .enqueue(object : Callback<List<LineupData>> {
-                override fun onResponse(
-                    call: Call<List<LineupData>>, response: Response<List<LineupData>>
-                ) {
-                    if (!isAdded || _binding == null) return
-                    lineupData = response.body()
-                    tryRender()
-                }
-                override fun onFailure(call: Call<List<LineupData>>, t: Throwable) {}
-            })
-    }
-
-    // ── 이벤트 로드 (교체 어노테이션용) ──────────────────────
-    private fun loadEvents(fixtureId: Long) {
-        RetrofitClient.apiService.getMatchInfo(fixtureId)
-            .enqueue(object : Callback<MatchInfoData> {
-                override fun onResponse(
-                    call: Call<MatchInfoData>, response: Response<MatchInfoData>
-                ) {
-                    if (!isAdded || _binding == null) return
-                    matchInfoData = response.body()
-                    tryRender()
-                }
-                override fun onFailure(call: Call<MatchInfoData>, t: Throwable) {
-                    matchInfoData = MatchInfoData(
-                        fixtureId = fixtureId, momPlayer = null, referee = null,
-                        matchFullDate = null, events = emptyList(), statistics = emptyList(),
-                        homeTopPlayers = emptyList(), awayTopPlayers = emptyList()
-                    )
-                    tryRender()
-                }
-            })
-    }
-
-    private fun tryRender() {
-        val lineups = lineupData ?: return
-        val info    = matchInfoData ?: return
-        if (lineups.size < 2) return
-        buildSubstMaps(info.events)
-        renderFullMatchLineup(lineups[0], lineups[1])
     }
 
     // ── 교체 맵 빌드 ─────────────────────────────────────────
@@ -148,6 +128,13 @@ class LineupFragment : Fragment() {
             val ivPhoto     = playerView.findViewById<ImageView>(R.id.ivPlayerPhoto)
             val tvName      = playerView.findViewById<TextView>(R.id.tvPlayerName)
             val tvSubstInfo = playerView.findViewById<TextView>(R.id.tvSubstInfo)
+            val tvRating    = playerView.findViewById<TextView>(R.id.tvPlayerRating)
+
+            player.id?.let { ratings[it.toLong()] }?.let { rating ->
+                tvRating.text = String.format("%.1f", rating)
+                tvRating.backgroundTintList = android.content.res.ColorStateList.valueOf(ratingColor(rating))
+                tvRating.visibility = View.VISIBLE
+            }
 
             tvName.text = "${player.number ?: "-"} - ${player.name}"
 
@@ -201,6 +188,18 @@ class LineupFragment : Fragment() {
         }
     }
 
+    private fun nameWithRating(p: PlayerData): String {
+        val rating = p.id?.let { ratings[it.toLong()] } ?: return p.name
+        return "${p.name}  ★" + String.format("%.1f", rating)
+    }
+
+    // 7점 이상 초록, 6점 미만 빨강, 그 사이는 강조색
+    private fun ratingColor(rating: Double): Int = when {
+        rating >= 7.0 -> android.graphics.Color.parseColor("#1FA971")
+        rating < 6.0 -> android.graphics.Color.parseColor("#D64545")
+        else -> android.graphics.Color.parseColor("#F2711C")
+    }
+
     // ── 교체 명단 ─────────────────────────────────────────────
     private fun renderSubstitutes(homeSubs: List<PlayerData>, awaySubs: List<PlayerData>) {
         val subContainer = binding.substitutesContainer
@@ -226,7 +225,7 @@ class LineupFragment : Fragment() {
                 val p = homeSubs[i]
                 layoutHome.visibility = View.VISIBLE
                 tvHomeNumber.text = (p.number ?: "").toString()
-                tvHomePlayer.text = p.name
+                tvHomePlayer.text = nameWithRating(p)
                 p.id?.let { pid ->
                     Glide.with(this)
                         .load("https://media.api-sports.io/football/players/$pid.png")
@@ -250,7 +249,7 @@ class LineupFragment : Fragment() {
                 val p = awaySubs[i]
                 layoutAway.visibility = View.VISIBLE
                 tvAwayNumber.text = (p.number ?: "").toString()
-                tvAwayPlayer.text = p.name
+                tvAwayPlayer.text = nameWithRating(p)
                 p.id?.let { pid ->
                     Glide.with(this)
                         .load("https://media.api-sports.io/football/players/$pid.png")

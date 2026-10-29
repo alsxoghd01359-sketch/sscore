@@ -8,7 +8,8 @@ data class MatchInfoResponseDto(
     val events: List<MatchEventDto> = emptyList(),
     val statistics: List<MatchStatItemDto> = emptyList(),
     val homeTopPlayers: List<MomPlayerDto> = emptyList(), // 🌟 홈팀 TOP 5
-    val awayTopPlayers: List<MomPlayerDto> = emptyList()  // 🌟 원정팀 TOP 5
+    val awayTopPlayers: List<MomPlayerDto> = emptyList(), // 🌟 원정팀 TOP 5
+    val playerRatings: Map<Long, Double> = emptyMap()     // 선수 id → 평점(API-Football). 라인업에 표시
 )
 
 data class MomPlayerDto(

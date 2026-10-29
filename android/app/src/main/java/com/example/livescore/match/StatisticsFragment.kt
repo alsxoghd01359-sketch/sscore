@@ -1,4 +1,6 @@
-package com.example.livescore
+package com.example.livescore.match
+
+import com.example.livescore.*
 
 import android.graphics.Color
 import android.os.Bundle
@@ -11,9 +13,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.common.StateHost
 import com.example.livescore.player.PlayerMatchStatsDialog
 
 class StatisticsFragment : Fragment() {
@@ -26,6 +26,7 @@ class StatisticsFragment : Fragment() {
     private lateinit var containerTopHome: LinearLayout
     private lateinit var containerTopAway: LinearLayout
 
+    private lateinit var host: StateHost
     private var fixtureId = -1L
 
     override fun onCreateView(
@@ -48,8 +49,8 @@ class StatisticsFragment : Fragment() {
         viewPossessionHome.setBackgroundColor(Color.parseColor(getTeamColor(homeTeamName, true)))
         viewPossessionAway.setBackgroundColor(Color.parseColor(getTeamColor(awayTeamName, false)))
 
-        if (fixtureId != -1L) loadStats(fixtureId)
-        return view
+        host = StateHost(requireContext(), view)
+        return host.root
     }
 
     private fun getTeamColor(teamName: String, isHome: Boolean): String {
@@ -69,21 +70,19 @@ class StatisticsFragment : Fragment() {
         }
     }
 
-    private fun loadStats(fixtureId: Long) {
-        RetrofitClient.apiService.getMatchInfo(fixtureId)
-            .enqueue(object : Callback<MatchInfoData> {
-                override fun onResponse(
-                    call: Call<MatchInfoData>, response: Response<MatchInfoData>
-                ) {
-                    if (!isAdded) return
-                    val matchInfo = response.body() ?: return
-                    renderStats(matchInfo.statistics)
-                    if (matchInfo.homeTopPlayers.isNotEmpty() || matchInfo.awayTopPlayers.isNotEmpty()) {
-                        renderTopPlayers(matchInfo.homeTopPlayers, matchInfo.awayTopPlayers)
-                    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val vm = matchDetailViewModel()
+        host.onRetry { vm.info.retry() }
+        vm.info.state.observe(viewLifecycleOwner) { state ->
+            host.render(state) { matchInfo ->
+                renderStats(matchInfo.statistics)
+                if (matchInfo.homeTopPlayers.isNotEmpty() || matchInfo.awayTopPlayers.isNotEmpty()) {
+                    renderTopPlayers(matchInfo.homeTopPlayers, matchInfo.awayTopPlayers)
                 }
-                override fun onFailure(call: Call<MatchInfoData>, t: Throwable) {}
-            })
+            }
+        }
+        vm.info.ensureLoaded()
     }
 
     private fun renderStats(stats: List<MatchStatItemData>) {

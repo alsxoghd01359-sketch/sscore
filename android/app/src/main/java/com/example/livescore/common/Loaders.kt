@@ -66,6 +66,16 @@ class SimpleLoader<T>(
 
     fun retry() = load()
 
+    // 이미 내용이 보이는 상태에서 로딩 표시 없이 다시 받는다. 실패하면 지금 내용을 그대로 두고, 바뀐 것이 없으면 다시 그리지 않는다.
+    fun refreshQuietly() {
+        val current = (_state.value as? UiState.Success)?.data ?: return
+        job?.cancel()
+        job = scope.launch {
+            val result = fetch()
+            if (result is ApiResult.Success && result.data != current) _state.value = UiState.Success(result.data)
+        }
+    }
+
     private fun load() {
         started = true
         _state.value = UiState.Loading

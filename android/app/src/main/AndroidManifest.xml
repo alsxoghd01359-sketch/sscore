@@ -46,7 +46,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".MatchDetailActivity"
+            android:name=".match.MatchDetailActivity"
             android:exported="false" />
 
         <activity

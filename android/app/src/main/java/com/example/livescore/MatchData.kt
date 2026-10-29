@@ -67,7 +67,8 @@ data class MatchInfoData(
     val events: List<MatchEventData> = emptyList(),
     val statistics: List<MatchStatItemData> = emptyList(),
     val homeTopPlayers: List<MomPlayerData> = emptyList(), // 🌟 홈팀 평점 TOP 5
-    val awayTopPlayers: List<MomPlayerData> = emptyList()  // 🌟 원정팀 평점 TOP 5
+    val awayTopPlayers: List<MomPlayerData> = emptyList(), // 🌟 원정팀 평점 TOP 5
+    val playerRatings: Map<Long, Double> = emptyMap()      // 선수 id → 평점 (라인업 표시용)
 )
 
 data class MomPlayerData(

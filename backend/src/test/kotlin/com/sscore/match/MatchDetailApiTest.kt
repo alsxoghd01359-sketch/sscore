@@ -93,6 +93,8 @@ class MatchDetailApiTest : ApiTest() {
             jsonPath("$.referee") { value("M. Oliver") }
             jsonPath("$.events[0].type") { value("Goal") }
             jsonPath("$.momPlayer.name") { value("B. Saka") }
+            jsonPath("$.playerRatings.10") { value(8.1) }
+            jsonPath("$.playerRatings.20") { value(6.5) }
         }
         // 같은 경기를 여러 번 봐도 외부 호출이 늘지 않는다 (기대값이 하나뿐이므로 더 부르면 실패)
         repeat(5) { info(live).andExpect { status { isOk() }; jsonPath("$.momPlayer.name") { value("B. Saka") } } }

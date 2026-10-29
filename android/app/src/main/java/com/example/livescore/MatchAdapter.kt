@@ -1,5 +1,6 @@
 package com.example.livescore
 
+import com.example.livescore.match.MatchDetailActivity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View

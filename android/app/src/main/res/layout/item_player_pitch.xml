@@ -25,6 +25,23 @@
         android:background="@drawable/bg_player_circle"
         android:scaleType="centerCrop" />
 
+    <!-- 평점 배지: 사진 오른쪽 위 모서리 (평점이 있을 때만 보임) -->
+    <TextView
+        android:id="@+id/tvPlayerRating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/ivPlayerPhoto"
+        android:layout_toEndOf="@id/ivPlayerPhoto"
+        android:layout_marginStart="-16dp"
+        android:layout_marginTop="-4dp"
+        android:background="@drawable/bg_rating_badge"
+        android:paddingHorizontal="4dp"
+        android:paddingVertical="1dp"
+        android:textColor="#FFFFFF"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <!-- 선수 이름: 사진 바로 아래, 최대 2줄 -->
     <TextView
         android:id="@+id/tvPlayerName"

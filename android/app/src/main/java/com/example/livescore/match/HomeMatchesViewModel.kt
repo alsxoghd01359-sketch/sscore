@@ -4,7 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.livescore.H2HSummaryData
+import com.example.livescore.LineupData
 import com.example.livescore.MatchData
+import com.example.livescore.MatchInfoData
 import com.example.livescore.RetrofitClient
 import com.example.livescore.common.ApiResult
 import com.example.livescore.common.UiState
@@ -13,17 +16,31 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 import java.time.LocalDate
 
 interface MatchApi {
     @GET("/api/soccer/matches")
     suspend fun matches(@Query("date") date: String, @Query("leagueId") leagueId: Int?): Response<List<MatchData>>
+
+    @GET("/api/soccer/matches/{fixtureId}/info")
+    suspend fun info(@Path("fixtureId") fixtureId: Long): Response<MatchInfoData>
+
+    @GET("/api/soccer/lineups/{fixtureId}")
+    suspend fun lineups(@Path("fixtureId") fixtureId: Long): Response<List<LineupData>>
+
+    @GET("/api/soccer/h2h")
+    suspend fun h2h(@Query("homeId") homeId: Int, @Query("awayId") awayId: Int): Response<H2HSummaryData>
 }
 
 class MatchRepository(private val api: MatchApi) {
     suspend fun matches(date: LocalDate, leagueId: Int?): ApiResult<List<MatchData>> =
         apiCall { api.matches(date.toString(), leagueId) }
+
+    suspend fun info(fixtureId: Long): ApiResult<MatchInfoData> = apiCall { api.info(fixtureId) }
+    suspend fun lineups(fixtureId: Long): ApiResult<List<LineupData>> = apiCall { api.lineups(fixtureId) }
+    suspend fun h2h(homeId: Int, awayId: Int): ApiResult<H2HSummaryData> = apiCall { api.h2h(homeId, awayId) }
 }
 
 // 홈 화면의 경기 목록. 날짜/리그를 고르면 새로 받고, 화면이 보이는 동안에는 조용히 다시 받아 점수를 갱신한다.

@@ -1,4 +1,6 @@
-package com.example.livescore
+package com.example.livescore.match
+
+import com.example.livescore.*
 
 import android.graphics.Color
 import android.view.LayoutInflater

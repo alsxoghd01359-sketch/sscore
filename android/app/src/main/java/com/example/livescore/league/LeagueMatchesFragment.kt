@@ -1,5 +1,6 @@
 package com.example.livescore.league
 
+import com.example.livescore.match.MatchDetailActivity
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface

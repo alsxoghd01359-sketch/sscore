@@ -57,6 +57,7 @@ object MatchInfoBuilder {
         var hDribbles = 0; var aDribbles = 0
 
         val homePlayers = mutableListOf<MomPlayerDto>()
+        val playerRatings = mutableMapOf<Long, Double>()
         val awayPlayers = mutableListOf<MomPlayerDto>()
         val playerStatsToSave = mutableListOf<PlayerStatEntity>()
 
@@ -126,6 +127,8 @@ object MatchInfoBuilder {
                             bestPlayerTeam = teamName
                             foundMom = true
                         }
+
+                        if (rating > 0) playerRatings[playerId] = rating
 
                         val playerDto = MomPlayerDto(
                             playerId = playerId, name = pName, teamName = teamName,
@@ -280,7 +283,8 @@ object MatchInfoBuilder {
             events = matchEvents,
             statistics = statList,
             homeTopPlayers = homeTop5,
-            awayTopPlayers = awayTop5
+            awayTopPlayers = awayTop5,
+            playerRatings = playerRatings
         )
         return BuiltMatchInfo(info, playerStatsToSave, eventEntities, finished, fetchedRefereeName)
     }
