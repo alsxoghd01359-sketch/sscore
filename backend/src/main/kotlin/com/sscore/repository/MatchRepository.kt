@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface MatchRepository : JpaRepository<MatchEntity, Long> {
+    fun findByMatchDateIn(dates: Collection<String>): List<MatchEntity>
+
 
     fun findByLeagueIdAndSeason(leagueId: Int, season: Int): List<MatchEntity>
 

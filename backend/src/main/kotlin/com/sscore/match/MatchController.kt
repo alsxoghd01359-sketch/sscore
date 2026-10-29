@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController
 class MatchListService(private val matches: MatchRepository) {
     fun all(): List<MatchDto> = matches.findAll().map { it.toMatchDto() }
 
+    fun byFixtureId(fixtureId: Long): MatchDto = matches.findByFixtureId(fixtureId)?.toMatchDto()
+        ?: throw com.sscore.common.ApiException(org.springframework.http.HttpStatus.NOT_FOUND, "MATCH_NOT_FOUND", "경기를 찾을 수 없습니다.")
+
     // 날짜(yyyy-MM-dd) + 리그 필터. 리그 → 시간 순
     fun byDate(date: String, leagueId: Int?): List<MatchDto> {
         val found = if (leagueId != null) matches.findByMatchDateAndLeagueId(date, leagueId) else matches.findByMatchDate(date)
@@ -37,6 +40,10 @@ class MatchController(
         @RequestParam(required = false) date: String?,
         @RequestParam(required = false) leagueId: Int?
     ): List<MatchDto> = if (date != null) list.byDate(date, leagueId) else list.all()
+
+    /** 경기 하나 (알림을 눌러 들어올 때처럼 경기 번호만 알 때) */
+    @GetMapping("/matches/{fixtureId}")
+    fun match(@PathVariable fixtureId: Long): MatchDto = list.byFixtureId(fixtureId)
 
     /** 경기 정보: 타임라인 · 통계 · 평점 상위 선수 */
     @GetMapping("/matches/{fixtureId}/info")

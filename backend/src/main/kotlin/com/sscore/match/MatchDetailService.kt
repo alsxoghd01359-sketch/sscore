@@ -71,6 +71,8 @@ class TtlCache<V : Any>(private val clock: Clock, private val ttl: Duration) {
         entries[key] = Entry(value, now.plus(ttl))
     }
 
+    fun remove(key: Any) { entries.remove(key) }
+
     fun clear() = entries.clear()
 
     private companion object {
@@ -145,6 +147,12 @@ class MatchDetailService(
         row.infoJson = json.writeValueAsString(built.info)
         row.finalizedAt = LocalDateTime.now(clock)
         details.save(row)
+    }
+
+    // 캐시를 건너뛰고 지금 상태를 다시 받는다 (득점 직후 알림을 위해). 받은 값은 캐시에 남아 화면 조회도 같은 값을 쓴다.
+    fun refreshInfo(fixtureId: Long): MatchInfoResponseDto {
+        infoCache.remove(fixtureId)
+        return getInfo(fixtureId)
     }
 
     // ── 라인업 ──────────────────────────────────────────────────

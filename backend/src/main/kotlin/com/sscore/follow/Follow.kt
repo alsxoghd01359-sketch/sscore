@@ -57,6 +57,7 @@ class Follow(
 @Repository
 interface FollowRepository : JpaRepository<Follow, Long> {
     fun findByMemberIdOrderByIdAsc(memberId: Int): List<Follow>
+    fun findByTargetTypeAndTargetIdIn(targetType: String, targetIds: Collection<Long>): List<Follow>
     fun findByMemberIdAndTargetTypeAndTargetId(memberId: Int, targetType: String, targetId: Long): Follow?
     fun existsByMemberIdAndTargetTypeAndTargetId(memberId: Int, targetType: String, targetId: Long): Boolean
     fun deleteByMemberIdAndTargetTypeAndTargetId(memberId: Int, targetType: String, targetId: Long): Long

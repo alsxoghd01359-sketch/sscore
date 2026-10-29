@@ -24,6 +24,9 @@ interface MatchApi {
     @GET("/api/soccer/matches")
     suspend fun matches(@Query("date") date: String, @Query("leagueId") leagueId: Int?): Response<List<MatchData>>
 
+    @GET("/api/soccer/matches/{fixtureId}")
+    suspend fun match(@Path("fixtureId") fixtureId: Long): Response<MatchData>
+
     @GET("/api/soccer/matches/{fixtureId}/info")
     suspend fun info(@Path("fixtureId") fixtureId: Long): Response<MatchInfoData>
 

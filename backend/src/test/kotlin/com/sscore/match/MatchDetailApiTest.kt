@@ -82,6 +82,17 @@ class MatchDetailApiTest : ApiTest() {
         lineups(9999).andExpect { status { isNotFound() } }
     }
 
+    @Test
+    fun `경기 번호로 경기 하나를 조회할 수 있다 (알림을 눌렀을 때)`() {
+        mockMvc.get("/api/soccer/matches/$live").andExpect {
+            status { isOk() }
+            jsonPath("$.fixtureId") { value(live) }
+            jsonPath("$.homeTeam") { value("Arsenal") }
+            jsonPath("$.score") { value("1-0") }
+        }
+        mockMvc.get("/api/soccer/matches/9999").andExpect { status { isNotFound() }; jsonPath("$.code") { value("MATCH_NOT_FOUND") } }
+    }
+
     // ── 진행 중인 경기: 짧게 캐시 ────────────────────────────────
 
     @Test

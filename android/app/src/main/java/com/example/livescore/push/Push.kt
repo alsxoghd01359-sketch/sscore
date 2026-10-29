@@ -69,11 +69,21 @@ class PushMessagingService : FirebaseMessagingService() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) return
 
+        // 알림을 누르면 경기 상세로 간다
+        val open = android.content.Intent(this, PushLaunchActivity::class.java).apply {
+            putExtra("fixtureId", message.data["fixtureId"])
+        }
+        val pending = android.app.PendingIntent.getActivity(
+            this, (message.data["fixtureId"]?.hashCode() ?: 0), open,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(this, MATCH_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
+            .setContentIntent(pending)
             .build()
         getSystemService(NotificationManager::class.java).notify(System.currentTimeMillis().toInt(), notification)
     }

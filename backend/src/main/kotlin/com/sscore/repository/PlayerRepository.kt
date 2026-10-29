@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface PlayerRepository : JpaRepository<PlayerEntity, Long> {
+    fun findByTeamTeamIdIn(teamIds: Collection<Int>): List<PlayerEntity>
+
     // 이름에 검색어가 들어간 선수. 검색어로 시작하는 이름을 먼저, 그다음 이름순. (utf8mb4_unicode_ci 라 악센트·대소문자를 구분하지 않는다)
     @Query("""
         SELECT p FROM PlayerEntity p

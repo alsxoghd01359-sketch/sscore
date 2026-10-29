@@ -55,6 +55,14 @@ class FcmPushPort(private val messaging: FirebaseMessaging) : PushPort {
             val built = com.google.firebase.messaging.Message.builder()
                 .setToken(token)
                 .setNotification(Notification.builder().setTitle(message.title).setBody(message.body).build())
+                // 앱이 꺼져 있을 때 알림을 누르면 경기 상세로 가도록 앱의 OPEN_MATCH 화면을 연다
+                .setAndroidConfig(
+                    com.google.firebase.messaging.AndroidConfig.builder()
+                        .setNotification(
+                            com.google.firebase.messaging.AndroidNotification.builder()
+                                .setClickAction("OPEN_MATCH").setChannelId("match_events").build()
+                        ).build()
+                )
                 .putAllData(message.data)
                 .build()
             try {

@@ -17,6 +17,18 @@
         android:theme="@style/Theme.SScore"
         tools:targetApi="31">
 
+        <!-- 알림을 누르면 열리는 화면 (서버가 보낸 푸시의 click_action = OPEN_MATCH) -->
+        <activity
+            android:name=".push.PushLaunchActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="OPEN_MATCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".push.PushMessagingService"
             android:exported="false">

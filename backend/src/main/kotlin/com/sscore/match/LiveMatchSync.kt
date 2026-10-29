@@ -5,6 +5,7 @@ import com.sscore.dto.MatchDto
 import com.sscore.entity.MatchEntity
 import com.sscore.football.FootballApiClient
 import com.sscore.league.LeagueCatalog
+import com.sscore.notification.MatchNotifier
 import com.sscore.repository.MatchRepository
 import com.sscore.service.ApiFootballService
 import org.slf4j.LoggerFactory
@@ -28,6 +29,18 @@ data class LiveSyncResult(
     val finished: Int = 0         // 이번 주기에 끝난 것으로 확인되어 확정본을 저장한 경기 수
 )
 
+// 라이브 갱신 한 번에서 바뀐 경기 하나 (바뀌기 전, 바뀐 뒤)
+private data class MatchChange(val before: MatchEntity, val after: MatchEntity) {
+    val ended get() = after.matchTime.contains("종료") && !before.matchTime.contains("종료")
+    val scoreChanged get() = before.score != after.score
+
+    // 이제 막 시작한 경기. 서버가 경기 도중에 처음 확인한 경우(분이 많이 지난 경우)는 시작 알림을 보내지 않는다.
+    val started get() = !before.matchTime.contains("진행중") && !before.matchTime.contains("종료") &&
+        after.matchTime.contains("진행중") && (minuteOf(after.matchTime) ?: 0) <= 15
+
+    private fun minuteOf(label: String) = Regex("""진행중 (\d+)""").find(label)?.groupValues?.get(1)?.toIntOrNull()
+}
+
 // 진행 중인 경기의 점수·경기 시간을 외부 API에서 받아 DB에 반영한다.
 // 외부 API는 "지금 진행 중일 수 있는 경기"가 DB에 있을 때만 부른다(하루 호출 한도를 지키기 위해).
 @Service
@@ -37,6 +50,7 @@ class LiveMatchSync(
     private val football: FootballApiClient,
     private val catalog: LeagueCatalog,
     private val details: MatchDetailService,
+    private val notifier: MatchNotifier,
     private val clock: Clock
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -71,8 +85,8 @@ class LiveMatchSync(
             failed = true
             emptyList()
         }
-        val endedNow = mutableListOf<Long>()
-        var updated = apply(live, endedNow)
+        val changes = mutableListOf<MatchChange>()
+        var updated = apply(live, changes)
 
         // 2. 라이브 목록에서 사라진 경기는 끝났을 수 있으므로 최종 결과를 확인한다
         if (!failed) {
@@ -81,7 +95,7 @@ class LiveMatchSync(
             for (chunk in toCheck.chunked(IDS_PER_CALL)) {
                 try {
                     calls++
-                    updated += apply(apiService.fetchFixturesByIds(chunk), endedNow)
+                    updated += apply(apiService.fetchFixturesByIds(chunk), changes)
                 } catch (e: ApiException) {
                     log.warn("경기 결과 확인 실패, 다음 주기에 다시 시도합니다: {}", e.message)
                     failed = true
@@ -90,8 +104,20 @@ class LiveMatchSync(
         }
 
         // 방금 끝난 경기는 타임라인·통계·평점·라인업의 확정본을 저장해 둔다 (이후 조회는 외부 호출 없이 DB에서 준다)
-        endedNow.forEach { details.finalizeMatch(it) }
+        val endedNow = changes.filter { it.ended }
+        endedNow.forEach { it.after.fixtureId?.let { id -> details.finalizeMatch(id) } }
         calls += endedNow.size * 2
+
+        // 시작·득점·종료를 팔로우한 회원에게 알린다. 알림에서 오류가 나도 갱신은 계속된다.
+        changes.forEach { c ->
+            try {
+                if (c.started) notifier.matchStarted(c.after)
+                if (c.scoreChanged) notifier.scoreChanged(c.after)
+                if (c.ended) notifier.matchEnded(c.after)
+            } catch (e: Exception) {
+                log.error("경기 알림 처리 중 오류 fixture={}", c.after.fixtureId, e)
+            }
+        }
 
         val result = LiveSyncResult(candidates.size, live.size, updated, calls, football.lastRemaining, failed, endedNow.size)
         report(result)
@@ -143,16 +169,17 @@ class LiveMatchSync(
         return (justEnded + stale).distinct()
     }
 
-    // 바뀐 경기만 저장한다. 이번에 처음 "종료"가 된 경기는 endedNow 에 모은다.
-    private fun apply(fresh: List<MatchDto>, endedNow: MutableList<Long>): Int {
+    // 바뀐 경기만 저장하고, 바뀐 내용(시작·득점·종료)을 changes 에 모은다.
+    private fun apply(fresh: List<MatchDto>, changes: MutableList<MatchChange>): Int {
         val ids = fresh.mapNotNull { it.fixtureId }
         if (ids.isEmpty()) return 0
         val existing = matches.findByFixtureIdIn(ids).associateBy { it.fixtureId }
         val changed = fresh.mapNotNull { dto ->
             val current = existing[dto.fixtureId] ?: return@mapNotNull null
             if (current.score == dto.score && current.matchTime == dto.matchTime) return@mapNotNull null
-            if (dto.matchTime.contains("종료") && !current.matchTime.contains("종료")) dto.fixtureId?.let { endedNow.add(it) }
-            current.copy(score = dto.score, matchTime = dto.matchTime)
+            val after = current.copy(score = dto.score, matchTime = dto.matchTime)
+            changes += MatchChange(current, after)
+            after
         }
         if (changed.isNotEmpty()) matches.saveAll(changed)
         return changed.size
@@ -162,7 +189,7 @@ class LiveMatchSync(
 // 15초마다 라이브 갱신을 돌린다. 어떤 오류가 나도 서버가 멈추지 않고 다음 주기에 다시 시도한다.
 @Component
 @ConditionalOnProperty(name = ["sscore.live.enabled"], havingValue = "true", matchIfMissing = true)
-class LiveMatchScheduler(private val sync: LiveMatchSync) {
+class LiveMatchScheduler(private val sync: LiveMatchSync, private val notifier: MatchNotifier) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Scheduled(fixedDelayString = "\${sscore.live.interval-ms:15000}", initialDelayString = "\${sscore.live.interval-ms:15000}")
@@ -171,6 +198,11 @@ class LiveMatchScheduler(private val sync: LiveMatchSync) {
             sync.sync()
         } catch (e: Exception) {
             log.error("라이브 갱신 중 예상하지 못한 오류", e)
+        }
+        try {
+            notifier.checkLineups()
+        } catch (e: Exception) {
+            log.error("라인업 알림 확인 중 예상하지 못한 오류", e)
         }
     }
 }
