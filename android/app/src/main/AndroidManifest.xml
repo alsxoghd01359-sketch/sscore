@@ -53,7 +53,7 @@
             android:name=".team.TeamDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".PlayerDetailActivity"
+            android:name=".player.PlayerDetailActivity"
             android:exported="false" />
         <activity
             android:name=".league.LeagueDetailActivity"

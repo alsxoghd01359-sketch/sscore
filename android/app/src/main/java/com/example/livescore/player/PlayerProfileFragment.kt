@@ -1,4 +1,4 @@
-package com.example.livescore
+package com.example.livescore.player
 
 import android.graphics.Color
 import android.os.Bundle
@@ -8,47 +8,30 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.livescore.databinding.FragmentPlayerProfileBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.*
+import com.example.livescore.common.renderState
 
 class PlayerProfileFragment : Fragment() {
 
     private var _binding: FragmentPlayerProfileBinding? = null
     private val binding get() = _binding!!
-
-    companion object {
-        fun newInstance(playerId: Long) = PlayerProfileFragment().apply {
-            arguments = Bundle().apply { putLong("playerId", playerId) }
-        }
-    }
+    private lateinit var vm: PlayerDetailViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPlayerProfileBinding.inflate(inflater, container, false)
-        val playerId = arguments?.getLong("playerId") ?: return binding.root
-        loadDetail(playerId)
         return binding.root
     }
 
-    private fun loadDetail(playerId: Long) {
-        binding.pbLoading.visibility = View.VISIBLE
-        RetrofitClient.apiService.getPlayerDetail(playerId)
-            .enqueue(object : Callback<PlayerDetailData> {
-                override fun onResponse(
-                    call: Call<PlayerDetailData>, response: Response<PlayerDetailData>
-                ) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                    val d = response.body() ?: return
-                    renderProfile(d)
-                }
-                override fun onFailure(call: Call<PlayerDetailData>, t: Throwable) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                }
-            })
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        vm = playerViewModel()
+        binding.errorView.btnRetry.setOnClickListener { vm.detail.retry() }
+        vm.detail.ensureLoaded()
+        vm.detail.state.observe(viewLifecycleOwner) { state ->
+            renderState(state, binding.pbLoading, binding.errorView) { renderProfile(it) }
+        }
     }
 
     private fun renderProfile(d: PlayerDetailData) {

@@ -1,4 +1,4 @@
-package com.example.livescore
+package com.example.livescore.player
 
 import android.graphics.Color
 import android.graphics.Typeface
@@ -7,52 +7,34 @@ import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.livescore.databinding.FragmentPlayerStatsBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.*
+import com.example.livescore.common.renderState
 
 class PlayerStatsFragment : Fragment() {
 
     private var _binding: FragmentPlayerStatsBinding? = null
     private val binding get() = _binding!!
+    private lateinit var vm: PlayerDetailViewModel
     private var seasonList = listOf<PlayerSeasonStatsDetailData>()
-    private var playerId = -1L
-
-    companion object {
-        fun newInstance(playerId: Long) = PlayerStatsFragment().apply {
-            arguments = Bundle().apply { putLong("playerId", playerId) }
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPlayerStatsBinding.inflate(inflater, container, false)
-        playerId = arguments?.getLong("playerId") ?: return binding.root
-        load()
         return binding.root
     }
 
-    private fun load() {
-        binding.pbLoading.visibility = View.VISIBLE
-        RetrofitClient.apiService.getPlayerSeasonStatsList(playerId)
-            .enqueue(object : Callback<List<PlayerSeasonStatsDetailData>> {
-                override fun onResponse(
-                    call: Call<List<PlayerSeasonStatsDetailData>>,
-                    response: Response<List<PlayerSeasonStatsDetailData>>
-                ) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                    val data = response.body() ?: return
-                    if (data.isEmpty()) return
-                    seasonList = data
-                    setupSpinner()
-                }
-                override fun onFailure(call: Call<List<PlayerSeasonStatsDetailData>>, t: Throwable) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                }
-            })
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        vm = playerViewModel()
+        binding.errorView.btnRetry.setOnClickListener { vm.seasonStats.retry() }
+        vm.seasonStats.ensureLoaded()
+        vm.seasonStats.state.observe(viewLifecycleOwner) { state ->
+            renderState(state, binding.pbLoading, binding.errorView) { data ->
+                seasonList = data
+                if (data.isNotEmpty()) setupSpinner()
+            }
+        }
     }
 
     private fun setupSpinner() {
@@ -68,7 +50,7 @@ class PlayerStatsFragment : Fragment() {
             }
             override fun onNothingSelected(p: AdapterView<*>?) {}
         }
-        if (seasonList.isNotEmpty()) renderStats(seasonList[0])
+        renderStats(seasonList[0])
     }
 
     private fun renderStats(d: PlayerSeasonStatsDetailData) {

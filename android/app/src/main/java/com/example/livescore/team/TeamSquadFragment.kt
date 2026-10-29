@@ -15,6 +15,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.livescore.databinding.FragmentTeamSquadBinding
 import com.example.livescore.*
 import com.example.livescore.common.renderState
+import com.example.livescore.player.PlayerDetailActivity
 
 class TeamSquadFragment : Fragment() {
 

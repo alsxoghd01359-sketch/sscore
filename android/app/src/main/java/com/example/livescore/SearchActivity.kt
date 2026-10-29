@@ -21,6 +21,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.example.livescore.team.TeamDetailActivity
+import com.example.livescore.player.PlayerDetailActivity
 
 class SearchActivity : AppCompatActivity() {
 

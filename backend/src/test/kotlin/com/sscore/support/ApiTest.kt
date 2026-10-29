@@ -39,6 +39,12 @@ abstract class ApiTest {
 
     protected lateinit var footballApi: MockRestServiceServer
 
+    // MockRestServiceServer는 요청이 나간 뒤 기대값을 더 추가할 수 없어서, 한 테스트에서 외부 호출을 여러 번 흉내 낼 때는 새로 만든다
+    protected fun freshFootballApi(): MockRestServiceServer {
+        footballApi = MockRestServiceServer.bindTo(restTemplate).build()
+        return footballApi
+    }
+
     @org.junit.jupiter.api.BeforeEach
     fun resetFakes() {
         footballApi = MockRestServiceServer.bindTo(restTemplate).build()

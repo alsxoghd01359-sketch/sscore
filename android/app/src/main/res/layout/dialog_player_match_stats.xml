@@ -31,6 +31,14 @@
             android:focusable="true"/>
     </RelativeLayout>
 
+    <ProgressBar android:id="@+id/pbLoading"
+        android:layout_width="wrap_content" android:layout_height="48dp"
+        android:layout_gravity="center_horizontal" android:visibility="gone"/>
+
+    <include android:id="@+id/errorView" layout="@layout/view_error"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
     <View android:layout_width="match_parent" android:layout_height="1dp"
         android:background="@color/surface_variant"/>
 

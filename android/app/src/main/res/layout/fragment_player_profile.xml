@@ -11,6 +11,10 @@
             android:layout_width="wrap_content" android:layout_height="48dp"
             android:layout_gravity="center" android:visibility="gone"/>
 
+    <include android:id="@+id/errorView" layout="@layout/view_error"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
         <!-- ① 키 + 나이 -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="80dp"
             android:orientation="horizontal" android:background="@color/surface"

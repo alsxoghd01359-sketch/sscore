@@ -1,6 +1,5 @@
 package com.sscore.controller
 
-import com.sscore.entity.PlayerSeasonStatEntity
 import com.sscore.dto.*
 import com.sscore.service.SoccerService
 import org.springframework.web.bind.annotation.*
@@ -31,11 +30,6 @@ class SoccerController(
         return soccerService.getLineups(fixtureId)
     }
 
-    @GetMapping("/player/{playerId}/career")
-    fun getPlayerCareer(@PathVariable playerId: Long): List<PlayerSeasonStatEntity> {
-        return soccerService.getPlayerCareerHistory(playerId)
-    }
-
     @GetMapping("/h2h")
     fun getH2H(@RequestParam homeId: Int, @RequestParam awayId: Int) =
         soccerService.getH2H(homeId, awayId)
@@ -49,31 +43,4 @@ class SoccerController(
     @GetMapping("/search")
     fun search(@RequestParam q: String): List<SearchResultDto> =
         soccerService.search(q)
-
-    /** 선수 경기 기록 */
-    @GetMapping("/player/{playerId}/matches")
-    fun getPlayerMatches(@PathVariable playerId: Long): List<PlayerMatchRecordDto> =
-        soccerService.getPlayerMatches(playerId)
-
-    /** 선수 시즌별 통계 목록 */
-    @GetMapping("/player/{playerId}/season-stats")
-    fun getPlayerSeasonStatsList(@PathVariable playerId: Long): List<PlayerSeasonStatsDetailDto> =
-        soccerService.getPlayerSeasonStatsList(playerId)
-
-    /** 선수 세부 페이지 (프로필+트로피+이번시즌) */
-    @GetMapping("/player/{playerId}/detail")
-    fun getPlayerDetail(@PathVariable playerId: Long): PlayerDetailDto? =
-        soccerService.getPlayerDetail(playerId)
-
-    /** 선수 프로필 + 커리어 스탯 */
-    @GetMapping("/player/{playerId}/profile")
-    fun getPlayerProfile(@PathVariable playerId: Long): PlayerProfileDto? =
-        soccerService.getPlayerProfile(playerId)
-
-    /** 선수 경기 스탯 */
-    @GetMapping("/player/{playerId}/match-stats")
-    fun getPlayerMatchStats(
-        @PathVariable playerId: Long,
-        @RequestParam fixtureId: Long
-    ): PlayerMatchStatDto? = soccerService.getPlayerMatchStats(playerId, fixtureId)
 }

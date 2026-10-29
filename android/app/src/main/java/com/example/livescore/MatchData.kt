@@ -228,16 +228,6 @@ data class CareerStatData(
     val minutesPlayed: Int
 )
 
-data class PlayerProfileData(
-    val playerId:        Long,
-    val name:            String,
-    val nationality:     String?,
-    val position:        String?,
-    val age:             Int?,
-    val photoUrl:        String,
-    val currentTeamName: String?,
-    val careerStats:     List<CareerStatData>
-)
 // ── 선수 세부 페이지 ──────────────────────────────────
 data class PlayerTrophyData(
     val trophyName: String,

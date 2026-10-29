@@ -1,4 +1,4 @@
-package com.example.livescore
+package com.example.livescore.player
 
 import android.graphics.Color
 import android.graphics.Typeface
@@ -14,9 +14,26 @@ import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.livescore.databinding.DialogPlayerMatchStatsBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.*
+import com.example.livescore.common.renderState
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.livescore.common.SimpleLoader
+
+// 한 경기에서의 선수 기록(다이얼로그가 열려 있는 동안 유지)
+class PlayerMatchStatsViewModel(
+    playerId: Long,
+    fixtureId: Long,
+    repository: PlayerRepository = PlayerRepository(RetrofitClient.playerApi)
+) : ViewModel() {
+    val stats = SimpleLoader(viewModelScope) { repository.matchStats(playerId, fixtureId) }
+}
+
+class MatchStatsFactory(private val playerId: Long, private val fixtureId: Long) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = PlayerMatchStatsViewModel(playerId, fixtureId) as T
+}
 
 class PlayerMatchStatsDialog : DialogFragment() {
 
@@ -43,9 +60,19 @@ class PlayerMatchStatsDialog : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.btnClose.setOnClickListener { dismiss() }
-        val playerId  = arguments?.getLong("playerId")  ?: return
+        val playerId = arguments?.getLong("playerId") ?: return
         val fixtureId = arguments?.getLong("fixtureId") ?: return
-        loadStats(playerId, fixtureId)
+
+        val vm = ViewModelProvider(this, MatchStatsFactory(playerId, fixtureId))[PlayerMatchStatsViewModel::class.java]
+        binding.errorView.btnRetry.setOnClickListener { vm.stats.retry() }
+        vm.stats.ensureLoaded()
+        vm.stats.state.observe(viewLifecycleOwner) { state ->
+            renderState(state, binding.pbLoading, binding.errorView) { data ->
+                renderHeader(data)
+                // 포지션 분기: G=골키퍼, 나머지=필드플레이어
+                if (data.position?.uppercase() == "G") renderGkStats(data) else renderFieldStats(data)
+            }
+        }
     }
 
     override fun onStart() {
@@ -57,25 +84,6 @@ class PlayerMatchStatsDialog : DialogFragment() {
             )
             setBackgroundDrawableResource(android.R.color.transparent)
         }
-    }
-
-    // ── 데이터 로드 ───────────────────────────────────────────
-    private fun loadStats(playerId: Long, fixtureId: Long) {
-        RetrofitClient.apiService.getPlayerMatchStats(playerId, fixtureId)
-            .enqueue(object : Callback<PlayerMatchStatData> {
-                override fun onResponse(
-                    call: Call<PlayerMatchStatData>,
-                    response: Response<PlayerMatchStatData>
-                ) {
-                    if (!isAdded || _binding == null) return
-                    val data = response.body() ?: return
-                    renderHeader(data)
-                    // 포지션 분기: G=골키퍼, 나머지=필드플레이어
-                    if (data.position?.uppercase() == "G") renderGkStats(data)
-                    else renderFieldStats(data)
-                }
-                override fun onFailure(call: Call<PlayerMatchStatData>, t: Throwable) {}
-            })
     }
 
     // ── 헤더 ─────────────────────────────────────────────────

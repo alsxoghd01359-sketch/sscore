@@ -1,4 +1,4 @@
-package com.example.livescore
+package com.example.livescore.player
 
 import android.content.Intent
 import android.graphics.Color
@@ -9,48 +9,43 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.livescore.databinding.FragmentPlayerMatchesBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.*
+import com.example.livescore.common.renderState
 
 class PlayerMatchesFragment : Fragment() {
 
     private var _binding: FragmentPlayerMatchesBinding? = null
     private val binding get() = _binding!!
-
-    companion object {
-        fun newInstance(playerId: Long) = PlayerMatchesFragment().apply {
-            arguments = Bundle().apply { putLong("playerId", playerId) }
-        }
-    }
+    private lateinit var vm: PlayerDetailViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPlayerMatchesBinding.inflate(inflater, container, false)
-        val playerId = arguments?.getLong("playerId") ?: return binding.root
-        load(playerId)
         return binding.root
     }
 
-    private fun load(playerId: Long) {
-        binding.pbLoading.visibility = View.VISIBLE
-        RetrofitClient.apiService.getPlayerMatches(playerId)
-            .enqueue(object : Callback<List<PlayerMatchRecordData>> {
-                override fun onResponse(
-                    call: Call<List<PlayerMatchRecordData>>,
-                    response: Response<List<PlayerMatchRecordData>>
-                ) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                    val list = response.body() ?: return
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        vm = playerViewModel()
+        binding.errorView.btnRetry.setOnClickListener { vm.matches.retry() }
+        vm.matches.ensureLoaded()
+        vm.matches.state.observe(viewLifecycleOwner) { state ->
+            binding.layoutMatches.removeAllViews()
+            renderState(state, binding.pbLoading, binding.errorView) { list ->
+                if (list.isEmpty()) {
+                    binding.layoutMatches.addView(TextView(requireContext()).apply {
+                        text = "경기 기록이 없습니다"
+                        textSize = 14f
+                        setTextColor(Color.parseColor("#6B7280"))
+                        gravity = Gravity.CENTER
+                        setPadding(0, dp(40), 0, 0)
+                    })
+                } else {
                     list.forEach { renderMatch(it) }
                 }
-                override fun onFailure(call: Call<List<PlayerMatchRecordData>>, t: Throwable) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                }
-            })
+            }
+        }
     }
 
     private fun renderMatch(m: PlayerMatchRecordData) {
