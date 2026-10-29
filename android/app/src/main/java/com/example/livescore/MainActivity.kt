@@ -6,15 +6,20 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.livescore.common.renderState
+import com.example.livescore.match.HomeMatchesViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import com.example.livescore.auth.SessionManager
 import com.example.livescore.auth.showAccountMenu
 import com.example.livescore.databinding.ActivityMainBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -31,8 +36,7 @@ class MainActivity : AppCompatActivity() {
     private var currentLeagueId: Int? = null
     private var currentPosition: Int = Int.MAX_VALUE / 2
 
-    // 진행 중인 API 콜을 취소하기 위한 참조 (날짜 빠르게 바꿀 때 이전 콜 취소)
-    private var pendingCall: Call<List<MatchData>>? = null
+    private val viewModel: HomeMatchesViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +49,24 @@ class MainActivity : AppCompatActivity() {
         updateCalendarButtonText()
         setupAccount()
 
+        binding.errorView.btnRetry.setOnClickListener { viewModel.retry() }
+        viewModel.state.observe(this) { state ->
+            renderState(state, binding.pbLoading, binding.errorView) { matchAdapter.updateData(it) }
+        }
         loadMatchesForDate()   // 오늘 날짜로 첫 로드
+        startLiveRefresh()
+    }
+
+    // 화면이 보이는 동안 15초마다 경기 목록을 조용히 다시 받아 점수를 갱신한다 (화면을 벗어나면 멈춘다)
+    private fun startLiveRefresh() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(LIVE_REFRESH_MS)
+                    viewModel.refreshQuietly()
+                }
+            }
+        }
     }
 
     // 헤더 계정 버튼: 게스트는 "로그인", 회원은 닉네임을 보여 준다
@@ -152,38 +173,12 @@ class MainActivity : AppCompatActivity() {
         currentPosition = targetPosition
     }
 
-    /**
-     * 선택된 날짜 + 리그를 서버에 전달해 해당 날짜 경기만 받아옴.
-     * 이전 진행 중인 콜은 취소해서 불필요한 응답 처리를 막음.
-     */
+    /** 선택된 날짜 + 리그의 경기를 받아온다. 이전 요청은 ViewModel이 취소한다. */
     private fun loadMatchesForDate() {
-        pendingCall?.cancel()   // 이전 요청 취소
-
-        val dateStr = selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)  // "yyyy-MM-dd"
-
-        val call = RetrofitClient.apiService.getMatches(
-            date     = dateStr,
-            leagueId = currentLeagueId
-        )
-        pendingCall = call
-
-        call.enqueue(object : Callback<List<MatchData>> {
-            override fun onResponse(call: Call<List<MatchData>>, response: Response<List<MatchData>>) {
-                if (call.isCanceled) return   // 취소된 콜 응답 무시
-                if (response.isSuccessful) {
-                    val matches = response.body() ?: emptyList()
-                    matchAdapter.updateData(matches)
-                }
-            }
-            override fun onFailure(call: Call<List<MatchData>>, t: Throwable) {
-                if (call.isCanceled) return
-                Toast.makeText(this@MainActivity, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-            }
-        })
+        viewModel.show(selectedDate, currentLeagueId)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        pendingCall?.cancel()
+    private companion object {
+        const val LIVE_REFRESH_MS = 15_000L
     }
 }

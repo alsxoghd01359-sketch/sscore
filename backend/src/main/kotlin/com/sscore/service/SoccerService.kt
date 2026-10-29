@@ -36,20 +36,6 @@ class SoccerService(
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    @Transactional
-    fun syncLiveMatches() {
-        val liveMatches = apiService.fetchLiveMatches()
-
-        liveMatches.forEach { liveMatch ->
-            val fixtureId = liveMatch.fixtureId ?: return@forEach
-            val existing = matchRepository.findByFixtureId(fixtureId)
-
-            if (existing != null && (existing.score != liveMatch.score || existing.matchTime != liveMatch.matchTime)) {
-                matchRepository.save(existing.copy(score = liveMatch.score, matchTime = liveMatch.matchTime))
-            }
-        }
-    }
-
     fun getAllMatchesFromDb(): List<MatchDto> {
         return matchRepository.findAll().map { it.toDto() }
     }

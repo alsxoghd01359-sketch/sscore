@@ -7,13 +7,6 @@ import retrofit2.http.Query
 import retrofit2.http.Body
 import retrofit2.http.POST
 interface ApiService {
-    // 1. 메인 화면: 날짜 + 리그 필터로 경기 목록 조회 (서버 사이드 필터링)
-    @GET("/api/soccer/matches")
-    fun getMatches(
-        @Query("date")     date:     String? = null,
-        @Query("leagueId") leagueId: Int?    = null
-    ): Call<List<MatchData>>
-
     // 2. 상세 화면 (라인업): fixtureId로 조회
     @GET("/api/soccer/lineups/{fixtureId}")
     fun getLineups(@Path("fixtureId") fixtureId: Long): Call<List<LineupData>>

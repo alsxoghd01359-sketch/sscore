@@ -236,8 +236,13 @@ class ApiFootballService(
     // ─────────────────────────────────────────────
     // 경기 목록
     // ─────────────────────────────────────────────
-    fun fetchLiveMatches(): List<MatchDto> =
-        parseFixtures(football.list("/fixtures", "live" to "all"))
+    // 지원 리그에서 지금 진행 중인 경기 (한 번의 호출)
+    fun fetchLiveMatches(leagueIds: List<Int>): List<MatchDto> =
+        parseFixtures(football.list("/fixtures", "live" to leagueIds.joinToString("-")))
+
+    // 경기 ID로 현재 상태를 조회 (한 번에 최대 20개)
+    fun fetchFixturesByIds(fixtureIds: List<Long>): List<MatchDto> =
+        parseFixtures(football.list("/fixtures", "ids" to fixtureIds.joinToString("-")))
 
     // 시즌 전체 경기 (5대 리그). 한 리그라도 외부 API 오류가 나면 전체를 실패시켜 일부만 저장되는 일이 없게 한다.
     fun fetchMatchesBySeason(season: Int): List<MatchDto> =

@@ -15,6 +15,10 @@ interface MatchRepository : JpaRepository<MatchEntity, Long> {
 
     fun findByFixtureId(fixtureId: Long): MatchEntity?
 
+    fun findByFixtureIdIn(fixtureIds: Collection<Long>): List<MatchEntity>
+
+    fun findByMatchDateInAndLeagueIdIn(matchDates: Collection<String>, leagueIds: Collection<Int>): List<MatchEntity>
+
     fun existsBySeason(season: Int): Boolean
 
     // 팀이 지원 리그에서 뛴 (리그, 시즌) 목록 (홈 경기 기준)

@@ -23,6 +23,11 @@ class FootballApiClient(
 
     private val baseUrl = "https://v3.football.api-sports.io"
 
+    // 가장 최근 응답 헤더로 알게 된 오늘 남은 호출 수 (아직 모르면 null)
+    @Volatile
+    final var lastRemaining: Int? = null
+        private set
+
     // 응답의 response 배열 항목들과, 페이지 단위 응답의 전체 페이지 수
     data class Page(val items: List<Map<*, *>>, val totalPages: Int)
 
@@ -74,6 +79,7 @@ class FootballApiClient(
     // 하루 호출 한도 확인용으로 남은 호출 수를 남긴다
     private fun logQuota(headers: HttpHeaders) {
         val remaining = headers.getFirst("x-ratelimit-requests-remaining")?.toIntOrNull() ?: return
+        lastRemaining = remaining
         if (remaining < 100) log.warn("외부 축구 API 오늘 남은 호출 수: {}", remaining) else log.debug("외부 축구 API 남은 호출 수: {}", remaining)
     }
 

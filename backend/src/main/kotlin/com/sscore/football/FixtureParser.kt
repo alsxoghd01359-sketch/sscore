@@ -28,7 +28,8 @@ object FixtureParser {
         val awayName = away["name"]?.toString() ?: return null
         val leagueId = (league["id"] as? Number)?.toInt() ?: return null
         val season = (league["season"] as? Number)?.toInt() ?: return null
-        val (date, time) = toKst(fixture["date"]?.toString(), status["short"]?.toString().orEmpty()) ?: run {
+        val elapsed = (status["elapsed"] as? Number)?.toInt()
+        val (date, time) = toKst(fixture["date"]?.toString(), status["short"]?.toString().orEmpty(), elapsed) ?: run {
             log.warn("경기 날짜를 읽을 수 없어 건너뜁니다: fixture={}", fixtureId)
             return null
         }
@@ -54,7 +55,7 @@ object FixtureParser {
     }
 
     // UTC 시각을 한국 시간의 (날짜, "시각 (상태)") 로 바꾼다
-    private fun toKst(iso: String?, statusShort: String): Pair<String, String>? {
+    private fun toKst(iso: String?, statusShort: String, elapsed: Int?): Pair<String, String>? {
         if (iso.isNullOrBlank()) return null
         val kst = try {
             ZonedDateTime.parse(iso, DateTimeFormatter.ISO_OFFSET_DATE_TIME).withZoneSameInstant(KST)
@@ -65,7 +66,8 @@ object FixtureParser {
         val label = when (statusShort) {
             "NS", "TBD" -> time
             "FT", "AET", "PEN" -> "$time (종료)"
-            "HT", "1H", "2H", "ET", "P" -> "$time (진행중)"
+            "1H", "2H", "ET" -> if (elapsed != null) "$time (진행중 ${elapsed}')" else "$time (진행중)"
+            "HT", "BT", "P", "LIVE" -> "$time (진행중)"
             "CANC", "PSTP" -> "$time (취소)"
             else -> "$time ($statusShort)"
         }
