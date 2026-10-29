@@ -35,6 +35,9 @@ abstract class ApiTest {
     protected lateinit var mail: FakeMailPort
 
     @Autowired
+    private lateinit var matchDetails: com.sscore.match.MatchDetailService
+
+    @Autowired
     private lateinit var restTemplate: RestTemplate
 
     protected lateinit var footballApi: MockRestServiceServer
@@ -49,6 +52,7 @@ abstract class ApiTest {
     fun resetFakes() {
         footballApi = MockRestServiceServer.bindTo(restTemplate).build()
         mail.clear()
+        matchDetails.clearCaches()
         clock.set(MutableClock.START)   // 스프링 컨텍스트가 테스트 클래스끼리 공유되므로 시계도 매번 처음으로 되돌린다
     }
 

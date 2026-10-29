@@ -149,10 +149,14 @@ class LiveMatchSyncTest : ApiTest() {
         clock.advance(Duration.ofMinutes(130))
         footballApi.expect(requestTo(liveUrl)).andRespond(ok(body()))
         footballApi.expect(requestTo("$base/fixtures?ids=1")).andRespond(ok(body(fixture(1, "FT", 90, 3, 1))))
+        // 끝난 경기의 확정본 저장: 경기 상세 + 라인업
+        footballApi.expect(requestTo("$base/fixtures?id=1")).andRespond(ok(body(fixture(1, "FT", 90, 3, 1))))
+        footballApi.expect(requestTo("$base/fixtures/lineups?fixture=1")).andRespond(ok(body()))
 
         val result = sync.sync()
 
-        assertEquals(2, result.apiCalls)
+        assertEquals(1, result.finished)
+        assertEquals(4, result.apiCalls)
         assertEquals(1, result.updated)
         assertEquals("3-1", reload(1).score)
         assertEquals("09:30 (종료)", reload(1).matchTime)

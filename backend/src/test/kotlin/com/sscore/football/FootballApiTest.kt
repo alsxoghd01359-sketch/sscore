@@ -36,11 +36,25 @@ class FootballApiTest : ApiTest() {
 
     private val base = "https://v3.football.api-sports.io"
 
+    @Autowired private lateinit var teams: com.sscore.repository.TeamRepository
+
     @BeforeEach
     fun clean() {
         matches.deleteAll()
         sessions.deleteAll()
         members.deleteAll()
+        teams.deleteAll()
+        // 라인업·상대전적은 우리 DB에 있는 경기/팀만 조회할 수 있다
+        teams.save(com.sscore.entity.TeamEntity(42, "Arsenal", "England", "arsenal.png"))
+        teams.save(com.sscore.entity.TeamEntity(49, "Chelsea", "England", "chelsea.png"))
+        listOf(1L, 2L, 3L, 100L).forEach { id ->
+            matches.save(
+                com.sscore.entity.MatchEntity(
+                    fixtureId = id, homeTeam = "Arsenal", awayTeam = "Chelsea", homeTeamId = 42, awayTeamId = 49,
+                    matchDate = "2026-01-01", matchTime = "09:30 (진행중 20')", score = "0-0", leagueId = 39, season = 2025
+                )
+            )
+        }
     }
 
     private fun ok(body: String) = withSuccess(body, MediaType.APPLICATION_JSON)
@@ -152,6 +166,7 @@ class FootballApiTest : ApiTest() {
     @Test
     fun `외부 API 오류로 경기 적재가 실패하면 아무것도 저장하지 않는다`() {
         val token = adminToken()
+        matches.deleteAll()
         footballApi.expect(requestTo("$base/fixtures?league=39&season=2025")).andRespond(
             ok("""{"errors":{"token":"Error/Missing application key"},"response":[]}""")
         )
@@ -164,6 +179,7 @@ class FootballApiTest : ApiTest() {
     @Test
     fun `읽을 수 없는 경기 항목은 건너뛰고 읽을 수 있는 경기만 저장한다`() {
         val token = adminToken()
+        matches.deleteAll()
         val broken = """{"fixture":{"id":999,"date":"not-a-date","status":{"short":"NS"}},"league":{"id":39,"season":2025},
             "teams":{"home":{"id":1,"name":"A"},"away":{"id":2,"name":"B"}}}"""
         val noTeams = """{"fixture":{"id":998,"date":"2025-08-16T14:00:00+00:00","status":{"short":"NS"}},"league":{"id":39,"season":2025}}"""
@@ -199,8 +215,9 @@ class FootballApiTest : ApiTest() {
 
     @Test
     fun `현재 시즌 데이터가 아직 없으면 데이터가 있는 가장 최근 시즌을 쓰고 있으면 현재 시즌을 쓴다`() {
+        matches.deleteAll()
         matches.save(com.sscore.entity.MatchEntity(
-            fixtureId = 1, homeTeam = "A", awayTeam = "B", matchDate = "2025-10-01", matchTime = "20:00",
+            fixtureId = 9001, homeTeam = "A", awayTeam = "B", matchDate = "2025-10-01", matchTime = "20:00",
             score = "1-0", leagueId = 39, season = 2025
         ))
         clock.advance(Duration.ofDays(300))   // 2026-10: 현재 시즌은 2026이지만 데이터는 2025뿐
@@ -209,7 +226,7 @@ class FootballApiTest : ApiTest() {
         assertEquals(2024, seasons.resolve(2024))   // 요청한 시즌이 있으면 그대로
 
         matches.save(com.sscore.entity.MatchEntity(
-            fixtureId = 2, homeTeam = "A", awayTeam = "B", matchDate = "2026-09-01", matchTime = "20:00",
+            fixtureId = 9002, homeTeam = "A", awayTeam = "B", matchDate = "2026-09-01", matchTime = "20:00",
             score = "0-0", leagueId = 39, season = 2026
         ))
         assertEquals(2026, seasons.effective())
@@ -217,8 +234,9 @@ class FootballApiTest : ApiTest() {
 
     @Test
     fun `시즌을 보내지 않으면 데이터가 있는 최근 시즌으로 리그 경기를 돌려준다`() {
+        matches.deleteAll()   // 기본으로 넣어 둔 경기는 빼고 이 테스트의 경기만 둔다
         matches.save(com.sscore.entity.MatchEntity(
-            fixtureId = 1, homeTeam = "Arsenal", awayTeam = "Chelsea", matchDate = "2025-10-01", matchTime = "20:00",
+            fixtureId = 9003, homeTeam = "Arsenal", awayTeam = "Chelsea", matchDate = "2025-10-01", matchTime = "20:00",
             score = "1-0", leagueId = 39, season = 2025
         ))
         clock.advance(Duration.ofDays(300))

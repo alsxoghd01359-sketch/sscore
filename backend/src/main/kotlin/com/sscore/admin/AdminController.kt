@@ -3,7 +3,6 @@ package com.sscore.admin
 import com.sscore.football.SeasonResolver
 import com.sscore.league.LeagueCatalog
 import com.sscore.service.BulkHistoricalInitService
-import com.sscore.service.SoccerService
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/admin")
 class AdminController(
-    private val soccerService: SoccerService,
+    private val imports: DataImportService,
     private val seasons: SeasonResolver,
     private val catalog: LeagueCatalog,
     private val bulkInitService: BulkHistoricalInitService,
@@ -32,7 +31,7 @@ class AdminController(
     ): String {
         val from = start ?: seasons.current()
         val to = end ?: from
-        soccerService.saveSeasonsRange(from, to)
+        imports.saveSeasonsRange(from, to)
         return "$from~$to 시즌 경기 데이터를 적재했습니다."
     }
 
@@ -42,7 +41,7 @@ class AdminController(
         @RequestParam(defaultValue = "39") leagueId: Int,
         @RequestParam(required = false) season: Int?,
         @RequestParam(defaultValue = "200") delayMs: Long
-    ): String = soccerService.importPlayerStatsForLeague(season ?: seasons.current(), leagueId, delayMs)
+    ): String = imports.importPlayerStatsForLeague(season ?: seasons.current(), leagueId, delayMs)
 
     /** 5대 리그 전체 경기 이벤트 일괄 수집 */
     @PostMapping("/match-events/import-all")
@@ -50,14 +49,14 @@ class AdminController(
         @RequestParam(required = false) season: Int?,
         @RequestParam(defaultValue = "400") delayMs: Long,
         @RequestParam(required = false) leagueId: Int?
-    ): String = soccerService.importAllLeagueMatchEvents(season ?: seasons.current(), delayMs, leagueId)
+    ): String = imports.importAllLeagueMatchEvents(season ?: seasons.current(), delayMs, leagueId)
 
     /** 팀 전체 경기 이벤트 일괄 수집 */
     @PostMapping("/match-events/import")
     fun importMatchEvents(
         @RequestParam teamId: Int,
         @RequestParam(required = false) season: Int?
-    ): String = soccerService.importMatchEventsForTeam(teamId, season ?: seasons.current())
+    ): String = imports.importMatchEventsForTeam(teamId, season ?: seasons.current())
 
     // ── 대량 적재 ────────────────────────────────────────────
     @PostMapping("/import/phase1")
@@ -105,7 +104,7 @@ class AdminController(
             val leagues = catalog.ids()
             for (season in fromSeason..to) {
                 for (leagueId in leagues) {
-                    runCatching { soccerService.syncChampions(leagueId, season) }
+                    runCatching { imports.syncChampions(leagueId, season) }
                         .onFailure { log.error("우승팀 적재 실패 league={} season={}", leagueId, season, it) }
                     Thread.sleep(delayMs)
                 }
@@ -126,7 +125,7 @@ class AdminController(
         @RequestParam teamId: Int,
         @RequestParam teamName: String
     ): String {
-        soccerService.addChampionManually(leagueId, season, teamId, teamName)
+        imports.addChampionManually(leagueId, season, teamId, teamName)
         return "저장했습니다: $teamName ($season 시즌, 리그 $leagueId)"
     }
 }

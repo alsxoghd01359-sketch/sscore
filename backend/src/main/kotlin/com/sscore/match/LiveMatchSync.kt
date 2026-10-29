@@ -24,7 +24,8 @@ data class LiveSyncResult(
     val updated: Int = 0,         // 점수·경기 시간이 바뀌어 DB에 반영한 경기 수
     val apiCalls: Int = 0,
     val remainingCalls: Int? = null,   // 오늘 남은 외부 API 호출 수 (모르면 null)
-    val failed: Boolean = false
+    val failed: Boolean = false,
+    val finished: Int = 0         // 이번 주기에 끝난 것으로 확인되어 확정본을 저장한 경기 수
 )
 
 // 진행 중인 경기의 점수·경기 시간을 외부 API에서 받아 DB에 반영한다.
@@ -35,6 +36,7 @@ class LiveMatchSync(
     private val apiService: ApiFootballService,
     private val football: FootballApiClient,
     private val catalog: LeagueCatalog,
+    private val details: MatchDetailService,
     private val clock: Clock
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -69,7 +71,8 @@ class LiveMatchSync(
             failed = true
             emptyList()
         }
-        var updated = apply(live)
+        val endedNow = mutableListOf<Long>()
+        var updated = apply(live, endedNow)
 
         // 2. 라이브 목록에서 사라진 경기는 끝났을 수 있으므로 최종 결과를 확인한다
         if (!failed) {
@@ -78,7 +81,7 @@ class LiveMatchSync(
             for (chunk in toCheck.chunked(IDS_PER_CALL)) {
                 try {
                     calls++
-                    updated += apply(apiService.fetchFixturesByIds(chunk))
+                    updated += apply(apiService.fetchFixturesByIds(chunk), endedNow)
                 } catch (e: ApiException) {
                     log.warn("경기 결과 확인 실패, 다음 주기에 다시 시도합니다: {}", e.message)
                     failed = true
@@ -86,7 +89,11 @@ class LiveMatchSync(
             }
         }
 
-        val result = LiveSyncResult(candidates.size, live.size, updated, calls, football.lastRemaining, failed)
+        // 방금 끝난 경기는 타임라인·통계·평점·라인업의 확정본을 저장해 둔다 (이후 조회는 외부 호출 없이 DB에서 준다)
+        endedNow.forEach { details.finalizeMatch(it) }
+        calls += endedNow.size * 2
+
+        val result = LiveSyncResult(candidates.size, live.size, updated, calls, football.lastRemaining, failed, endedNow.size)
         report(result)
         return result
     }
@@ -136,15 +143,16 @@ class LiveMatchSync(
         return (justEnded + stale).distinct()
     }
 
-    // 바뀐 경기만 저장한다
-    private fun apply(fresh: List<MatchDto>): Int {
+    // 바뀐 경기만 저장한다. 이번에 처음 "종료"가 된 경기는 endedNow 에 모은다.
+    private fun apply(fresh: List<MatchDto>, endedNow: MutableList<Long>): Int {
         val ids = fresh.mapNotNull { it.fixtureId }
         if (ids.isEmpty()) return 0
         val existing = matches.findByFixtureIdIn(ids).associateBy { it.fixtureId }
         val changed = fresh.mapNotNull { dto ->
             val current = existing[dto.fixtureId] ?: return@mapNotNull null
-            if (current.score == dto.score && current.matchTime == dto.matchTime) null
-            else current.copy(score = dto.score, matchTime = dto.matchTime)
+            if (current.score == dto.score && current.matchTime == dto.matchTime) return@mapNotNull null
+            if (dto.matchTime.contains("종료") && !current.matchTime.contains("종료")) dto.fixtureId?.let { endedNow.add(it) }
+            current.copy(score = dto.score, matchTime = dto.matchTime)
         }
         if (changed.isNotEmpty()) matches.saveAll(changed)
         return changed.size
