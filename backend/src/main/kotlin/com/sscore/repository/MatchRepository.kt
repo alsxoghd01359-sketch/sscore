@@ -17,6 +17,18 @@ interface MatchRepository : JpaRepository<MatchEntity, Long> {
 
     fun existsBySeason(season: Int): Boolean
 
+    // 팀이 지원 리그에서 뛴 (리그, 시즌) 목록 (홈 경기 기준)
+    @Query("""
+        SELECT new com.sscore.repository.TeamLeagueSeason(m.homeTeamId, m.leagueId, m.season)
+        FROM MatchEntity m
+        WHERE m.homeTeamId IN :teamIds AND m.leagueId IN :leagueIds
+        GROUP BY m.homeTeamId, m.leagueId, m.season
+    """)
+    fun teamLeagueSeasons(
+        @Param("teamIds") teamIds: Collection<Int>,
+        @Param("leagueIds") leagueIds: Collection<Int>
+    ): List<TeamLeagueSeason>
+
     @Query("SELECT DISTINCT m.season FROM MatchEntity m WHERE m.leagueId = :leagueId ORDER BY m.season DESC")
     fun seasonsOfLeague(@Param("leagueId") leagueId: Int): List<Int>
 
@@ -72,3 +84,5 @@ interface MatchRepository : JpaRepository<MatchEntity, Long> {
         pageable: Pageable
     ): Page<MatchEntity>
 }
+
+data class TeamLeagueSeason(val teamId: Int, val leagueId: Int, val season: Int)

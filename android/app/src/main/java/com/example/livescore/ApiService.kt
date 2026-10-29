@@ -35,7 +35,4 @@ interface ApiService {
     @GET("/api/soccer/matches/{fixtureId}/info")
     fun getMatchInfo(@Path("fixtureId") fixtureId: Long): Call<MatchInfoData>
 
-    @GET("/api/soccer/search")
-    fun search(@Query("q") q: String): Call<List<SearchResultData>>
-
 }

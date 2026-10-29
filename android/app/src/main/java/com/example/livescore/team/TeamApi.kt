@@ -17,7 +17,8 @@ data class TeamInfoData(
     val country: String?,
     val logoUrl: String?,
     val leagueId: Int?,
-    val leagueName: String?
+    val leagueName: String?,
+    val nameKo: String? = null
 )
 
 // leagueId/season을 보내지 않으면(null) 서버가 팀의 리그와 데이터가 있는 최근 시즌을 쓴다

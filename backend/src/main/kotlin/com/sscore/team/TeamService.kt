@@ -30,7 +30,8 @@ data class TeamInfoDto(
     val country: String?,
     val logoUrl: String?,
     val leagueId: Int?,
-    val leagueName: String?
+    val leagueName: String?,
+    val nameKo: String? = null
 )
 
 // 팀 상세 화면(개요·경기·순위·통계·스쿼드)의 조회 로직
@@ -42,7 +43,8 @@ class TeamService(
     private val players: PlayerRepository,
     private val playerSeasonStats: PlayerSeasonStatRepository,
     private val apiService: ApiFootballService,
-    private val catalog: LeagueCatalog
+    private val catalog: LeagueCatalog,
+    private val aliases: TeamAliasRepository
 ) {
     // 없는 팀으로는 외부 API 호출이나 조회를 하지 않는다
     fun requireTeam(teamId: Int): TeamEntity = teams.findById(teamId).orElseThrow {
@@ -59,7 +61,8 @@ class TeamService(
     fun getInfo(teamId: Int): TeamInfoDto {
         val team = requireTeam(teamId)
         val leagueId = matches.findLeagueIdByTeamId(teamId).firstOrNull { catalog.isSupported(it) }
-        return TeamInfoDto(team.teamId, team.name, team.country, team.logoUrl, leagueId, leagueId?.let { catalog.nameKo(it) })
+        val nameKo = aliases.findByTeamIdIn(listOf(teamId)).firstOrNull { it.primary }?.name
+        return TeamInfoDto(team.teamId, team.name, team.country, team.logoUrl, leagueId, leagueId?.let { catalog.nameKo(it) }, nameKo)
     }
 
     fun getTrophies(teamId: Int): List<TrophyDto> {

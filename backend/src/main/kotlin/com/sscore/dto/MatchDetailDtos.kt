@@ -343,5 +343,6 @@ data class SearchResultDto(
     val subName:  String?,
     val logoUrl:  String?,
     val leagueId: Int?,
-    val sortOrder: Int = 99
+    val sortOrder: Int = 99,
+    val nameKo:   String? = null   // 한글 이름 (팀·리그). 없으면 null
 )

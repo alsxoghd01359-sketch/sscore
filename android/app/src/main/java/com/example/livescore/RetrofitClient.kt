@@ -7,6 +7,7 @@ import com.example.livescore.auth.TokenAuthenticator
 import com.example.livescore.league.LeagueApi
 import com.example.livescore.member.MemberApi
 import com.example.livescore.player.PlayerApi
+import com.example.livescore.search.SearchApi
 import com.example.livescore.team.TeamApi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -45,4 +46,6 @@ object RetrofitClient {
     val teamApi: TeamApi by lazy { retrofit(authedClient).create(TeamApi::class.java) }
 
     val playerApi: PlayerApi by lazy { retrofit(authedClient).create(PlayerApi::class.java) }
+
+    val searchApi: SearchApi by lazy { retrofit(authedClient).create(SearchApi::class.java) }
 }

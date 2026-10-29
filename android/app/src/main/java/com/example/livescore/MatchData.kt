@@ -348,5 +348,6 @@ data class SearchResultData(
     val subName:  String?,
     val logoUrl:  String?,
     val leagueId: Int?,
-    val sortOrder: Int = 99
+    val sortOrder: Int = 99,
+    val nameKo:   String? = null
 )

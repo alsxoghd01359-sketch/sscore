@@ -201,67 +201,6 @@ class SoccerService(
         return "완료 — 임포트: ${imported}경기 / 스킵(기존): ${skipped}경기 / 실패: ${failed}경기"
     }
 
-    fun search(query: String): List<SearchResultDto> {
-        val q = query.trim()
-        if (q.length < 2) return emptyList()
-
-        // 리그 순서 (정렬 기준)
-        val leagueOrder = mapOf(
-            "Premier League" to 1, "La Liga" to 2,
-            "Bundesliga" to 3, "Serie A" to 4, "Ligue 1" to 5
-        )
-
-        val players    = mutableListOf<SearchResultDto>()
-        val teams      = mutableListOf<SearchResultDto>()
-        val leagues    = mutableListOf<SearchResultDto>()
-        val seenTeams  = mutableSetOf<Int>()
-
-        // 1. 선수 검색 (소속팀은 최근 시즌 스탯 기준)
-        playerRepository.searchByName(q).take(10).forEach { p ->
-            val latestStat = playerSeasonStatRepository
-                .findByPlayerIdOrderBySeasonDesc(p.playerId).firstOrNull()
-            val teamName   = latestStat?.teamName ?: p.team?.name
-            val leagueName = latestStat?.leagueName
-            val order      = leagueOrder[leagueName] ?: 99
-
-            players.add(SearchResultDto("PLAYER", p.playerId,
-                p.name, teamName, p.photoUrl, null, order))
-
-            // 선수 소속팀 연관 결과
-            p.team?.let { t ->
-                if (seenTeams.add(t.teamId)) {
-                    val leagueId = matchRepository.findLeagueIdByTeamId(t.teamId).firstOrNull()
-                    teams.add(SearchResultDto("TEAM", t.teamId.toLong(),
-                        t.name, leagueCatalog.nameKo(leagueId ?: 39), t.logoUrl, leagueId,
-                        leagueOrder[leagueCatalog.nameEn(leagueId ?: 39)] ?: 99))
-                }
-            }
-        }
-
-        // 2. 팀 직접 검색
-        teamRepository.searchByName(q).take(5).forEach { t ->
-            if (seenTeams.add(t.teamId)) {
-                val leagueId = matchRepository.findLeagueIdByTeamId(t.teamId).firstOrNull()
-                val engName  = leagueCatalog.nameEn(leagueId ?: 39)
-                teams.add(SearchResultDto("TEAM", t.teamId.toLong(),
-                    t.name, leagueCatalog.nameKo(leagueId ?: 39), t.logoUrl, leagueId,
-                    leagueOrder[engName] ?: 99))
-            }
-        }
-
-        // 3. 리그 검색
-        leagueRepository.searchByName(q).take(3).forEach { l ->
-            leagues.add(SearchResultDto("LEAGUE", l.leagueId.toLong(),
-                l.name, l.country, l.logoUrl, l.leagueId,
-                leagueOrder[l.name] ?: 99))
-        }
-
-        // 정렬: 선수 우선(리그순) → 팀(리그순) → 리그
-        return players.sortedBy { it.sortOrder } +
-                teams.sortedBy   { it.sortOrder } +
-                leagues.sortedBy { it.sortOrder }
-    }
-
     // 🌟 추가된 H2H 로직
     fun getH2H(homeId: Int, awayId: Int): H2HSummaryDto {
         val h2hMatches = apiService.fetchH2H(homeId, awayId)

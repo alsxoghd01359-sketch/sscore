@@ -38,9 +38,4 @@ class SoccerController(
     fun getMatchInfo(@PathVariable fixtureId: Long): MatchInfoResponseDto {
         return soccerService.getMatchInfo(fixtureId)
     }
-
-    /** 통합 검색 (선수·팀·리그) */
-    @GetMapping("/search")
-    fun search(@RequestParam q: String): List<SearchResultDto> =
-        soccerService.search(q)
 }

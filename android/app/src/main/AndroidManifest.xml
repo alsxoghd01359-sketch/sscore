@@ -59,7 +59,7 @@
             android:name=".league.LeagueDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".SearchActivity"
+            android:name=".search.SearchActivity"
             android:exported="false" />
     </application>
 

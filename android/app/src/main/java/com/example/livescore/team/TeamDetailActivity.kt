@@ -48,6 +48,7 @@ class TeamDetailActivity : AppCompatActivity() {
             if (info != null && binding.tvLeagueName.text.isNullOrEmpty()) {
                 binding.tvLeagueName.text = info.leagueName.orEmpty()
             }
+            info?.nameKo?.let { binding.tvTeamName.text = it }
         }
     }
 }
