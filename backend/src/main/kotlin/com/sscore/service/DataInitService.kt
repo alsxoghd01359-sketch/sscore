@@ -2,6 +2,7 @@ package com.sscore.service
 
 import com.sscore.entity.LeagueEntity
 import com.sscore.football.SeasonResolver
+import com.sscore.league.LeagueCatalog
 import com.sscore.repository.LeagueRepository
 import com.sscore.repository.MatchRepository
 import com.sscore.repository.TeamRepository
@@ -20,25 +21,18 @@ class DataInitService(
     private val teamRepository: TeamRepository,
     private val matchRepository: MatchRepository,
     private val seasons: SeasonResolver,
+    private val catalog: LeagueCatalog,
     @Value("\${sscore.init.enabled:true}") private val initEnabled: Boolean
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    private val bigFiveLeagueIds = listOf(39, 140, 78, 135, 61)
 
     @PostConstruct
     fun initLeagues() {
-        val leagues = listOf(
-            LeagueEntity(39,  "Premier League", "England", "https://media.api-sports.io/football/leagues/39.png",  "League"),
-            LeagueEntity(140, "La Liga",         "Spain",   "https://media.api-sports.io/football/leagues/140.png", "League"),
-            LeagueEntity(78,  "Bundesliga",      "Germany", "https://media.api-sports.io/football/leagues/78.png",  "League"),
-            LeagueEntity(135, "Serie A",         "Italy",   "https://media.api-sports.io/football/leagues/135.png", "League"),
-            LeagueEntity(61,  "Ligue 1",         "France",  "https://media.api-sports.io/football/leagues/61.png",  "League")
-        )
-        leagues.forEach { league ->
-            if (!leagueRepository.existsById(league.leagueId)) {
-                leagueRepository.save(league)
-                log.info("✅ 리그 등록: {}", league.name)
+        catalog.all().forEach { meta ->
+            if (!leagueRepository.existsById(meta.id)) {
+                leagueRepository.save(LeagueEntity(meta.id, meta.nameEn.ifEmpty { meta.nameKo }, meta.country.ifEmpty { null }, catalog.logoUrl(meta.id), "League"))
+                log.info("리그 등록: {}", meta.nameKo)
             }
         }
     }
@@ -54,7 +48,7 @@ class DataInitService(
 
         val currentSeason = seasons.current()
         log.info("🚀 [DataInitService] DB가 비어 있음 → 현재 시즌({}) 데이터 적재 시작...", currentSeason)
-        for (leagueId in bigFiveLeagueIds) {
+        for (leagueId in catalog.ids()) {
             runCatching { apiService.syncTeams(leagueId, currentSeason) }
                 .onFailure { log.error("팀 초기화 실패: leagueId={}", leagueId, it) }
 

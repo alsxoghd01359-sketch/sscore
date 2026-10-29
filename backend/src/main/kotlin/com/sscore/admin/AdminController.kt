@@ -1,6 +1,7 @@
 package com.sscore.admin
 
 import com.sscore.football.SeasonResolver
+import com.sscore.league.LeagueCatalog
 import com.sscore.service.BulkHistoricalInitService
 import com.sscore.service.SoccerService
 import org.slf4j.LoggerFactory
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class AdminController(
     private val soccerService: SoccerService,
     private val seasons: SeasonResolver,
+    private val catalog: LeagueCatalog,
     private val bulkInitService: BulkHistoricalInitService,
     private val plHistorySeed: PremierLeagueHistorySeed
 ) {
@@ -100,7 +102,7 @@ class AdminController(
     ): String {
         val to = toSeason ?: seasons.current()
         Thread({
-            val leagues = listOf(39, 140, 78, 135, 61)
+            val leagues = catalog.ids()
             for (season in fromSeason..to) {
                 for (leagueId in leagues) {
                     runCatching { soccerService.syncChampions(leagueId, season) }

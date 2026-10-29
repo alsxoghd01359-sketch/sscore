@@ -56,7 +56,7 @@
             android:name=".PlayerDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".LeagueDetailActivity"
+            android:name=".league.LeagueDetailActivity"
             android:exported="false" />
         <activity
             android:name=".SearchActivity"

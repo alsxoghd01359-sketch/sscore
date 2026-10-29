@@ -17,6 +17,9 @@ interface MatchRepository : JpaRepository<MatchEntity, Long> {
 
     fun existsBySeason(season: Int): Boolean
 
+    @Query("SELECT DISTINCT m.season FROM MatchEntity m WHERE m.leagueId = :leagueId ORDER BY m.season DESC")
+    fun seasonsOfLeague(@Param("leagueId") leagueId: Int): List<Int>
+
     // 데이터가 있는 가장 최근 시즌 (기준 시즌 이하)
     @Query("SELECT MAX(m.season) FROM MatchEntity m WHERE m.season <= :season")
     fun latestSeasonUpTo(@Param("season") season: Int): Int?

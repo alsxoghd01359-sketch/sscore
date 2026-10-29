@@ -38,10 +38,6 @@ class SoccerController(
         return soccerService.getPlayerCareerHistory(playerId)
     }
 
-    @GetMapping("/standings")
-    fun getStandings(@RequestParam leagueId: Int, @RequestParam(required = false) season: Int?) =
-        soccerService.getStandings(leagueId, seasons.resolve(season))
-
     @GetMapping("/h2h")
     fun getH2H(@RequestParam homeId: Int, @RequestParam awayId: Int) =
         soccerService.getH2H(homeId, awayId)
@@ -55,32 +51,6 @@ class SoccerController(
     @GetMapping("/search")
     fun search(@RequestParam q: String): List<SearchResultDto> =
         soccerService.search(q)
-
-    /** 리그 기본 정보 */
-    @GetMapping("/league/{leagueId}")
-    fun getLeagueInfo(@PathVariable leagueId: Int): LeagueInfoDto? =
-        soccerService.getLeagueInfo(leagueId)
-
-    /** 리그 플레이어 통계 (득점/도움/공격P/평점) */
-    @GetMapping("/league/{leagueId}/player-stats")
-    fun getLeaguePlayerStats(
-        @PathVariable leagueId: Int,
-        @RequestParam(required = false) season: Int?
-    ): LeaguePlayerStatsDto = soccerService.getLeaguePlayerStats(leagueId, seasons.resolve(season))
-
-    /** 리그 팀 통계 (평균평점/득점/실점/클린시트) */
-    @GetMapping("/league/{leagueId}/team-stats")
-    fun getLeagueTeamStats(
-        @PathVariable leagueId: Int,
-        @RequestParam(required = false) season: Int?
-    ): LeagueTeamStatsDto = soccerService.getLeagueTeamStats(leagueId, seasons.resolve(season))
-
-    /** 리그 경기 일정/결과 (날짜별 그룹) */
-    @GetMapping("/league/{leagueId}/matches")
-    fun getLeagueMatches(
-        @PathVariable leagueId: Int,
-        @RequestParam(required = false) season: Int?
-    ): List<LeagueMatchDayDto> = soccerService.getLeagueMatches(leagueId, seasons.resolve(season))
 
     /** 선수 경기 기록 */
     @GetMapping("/player/{playerId}/matches")

@@ -1,4 +1,4 @@
-package com.example.livescore
+package com.example.livescore.league
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -13,10 +13,10 @@ class LeagueDetailPagerAdapter(
     override fun getItemCount() = tabs.size
 
     override fun createFragment(position: Int): Fragment = when (tabs[position]) {
-        "순위"        -> LeagueStandingsFragment.newInstance(leagueId)
-        "경기"        -> LeagueMatchesFragment.newInstance(leagueId)
+        "순위" -> LeagueStandingsFragment.newInstance(leagueId)
+        "경기" -> LeagueMatchesFragment.newInstance(leagueId)
         "플레이어 통계" -> LeaguePlayerStatsFragment.newInstance(leagueId)
-        "팀 통계"     -> LeagueTeamStatsFragment.newInstance(leagueId)
-        else          -> LeagueStubFragment.newInstance(tabs[position])
+        "팀 통계" -> LeagueTeamStatsFragment.newInstance(leagueId)
+        else -> error("알 수 없는 탭: ${tabs[position]}")
     }
 }

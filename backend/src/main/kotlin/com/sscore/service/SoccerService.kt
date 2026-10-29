@@ -16,6 +16,7 @@ import java.time.ZonedDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.sscore.football.SeasonResolver
+import com.sscore.league.LeagueCatalog
 import com.sscore.common.ApiException
 
 @Service
@@ -29,7 +30,8 @@ class SoccerService(
     private val leagueRepository: LeagueRepository,
     private val teamRepository: TeamRepository,
     private val playerRepository: PlayerRepository,
-    private val seasons: SeasonResolver
+    private val seasons: SeasonResolver,
+    private val leagueCatalog: LeagueCatalog
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -120,15 +122,6 @@ class SoccerService(
     fun getLineups(fixtureId: Long): List<LineupDto> = apiService.fetchLineups(fixtureId)
     fun getPlayerCareerHistory(playerId: Long): List<PlayerSeasonStatEntity> = emptyList()
 
-    fun leagueIdToName(leagueId: Int) = when (leagueId) {
-        39  -> "프리미어리그"
-        140 -> "라리가"
-        78  -> "분데스리가"
-        135 -> "세리에 A"
-        61  -> "리그 1"
-        else -> "리그 $leagueId"
-    }
-
     @Transactional
     fun addChampionManually(leagueId: Int, season: Int, teamId: Int, teamName: String) {
         val existing = championRepository.findByTeamId(teamId)
@@ -146,9 +139,6 @@ class SoccerService(
 
     fun syncChampions(leagueId: Int, season: Int) =
         apiService.syncChampions(leagueId, season)
-
-    fun getStandings(leagueId: Int, season: Int): List<StandingDto> =
-        apiService.fetchStandings(leagueId, season)
 
 
     // ── 선수 경기 기록 ─────────────────────────────────────────
@@ -409,7 +399,7 @@ class SoccerService(
 
     // 5대 리그 전체 경기 이벤트 일괄 수집
     fun importAllLeagueMatchEvents(season: Int, delayMs: Long = 400, leagueId: Int? = null): String {
-        val bigFive  = if (leagueId != null) listOf(leagueId) else listOf(39, 140, 78, 135, 61)
+        val bigFive  = if (leagueId != null) listOf(leagueId) else leagueCatalog.ids()
         var imported = 0; var skipped = 0; var failed = 0
 
         bigFive.forEach { leagueId ->
@@ -470,8 +460,8 @@ class SoccerService(
                 if (seenTeams.add(t.teamId)) {
                     val leagueId = matchRepository.findLeagueIdByTeamId(t.teamId).firstOrNull()
                     teams.add(SearchResultDto("TEAM", t.teamId.toLong(),
-                        t.name, leagueIdToName(leagueId ?: 39), t.logoUrl, leagueId,
-                        leagueOrder[leagueIdToEnglishName(leagueId ?: 39)] ?: 99))
+                        t.name, leagueCatalog.nameKo(leagueId ?: 39), t.logoUrl, leagueId,
+                        leagueOrder[leagueCatalog.nameEn(leagueId ?: 39)] ?: 99))
                 }
             }
         }
@@ -480,9 +470,9 @@ class SoccerService(
         teamRepository.searchByName(q).take(5).forEach { t ->
             if (seenTeams.add(t.teamId)) {
                 val leagueId = matchRepository.findLeagueIdByTeamId(t.teamId).firstOrNull()
-                val engName  = leagueIdToEnglishName(leagueId ?: 39)
+                val engName  = leagueCatalog.nameEn(leagueId ?: 39)
                 teams.add(SearchResultDto("TEAM", t.teamId.toLong(),
-                    t.name, leagueIdToName(leagueId ?: 39), t.logoUrl, leagueId,
+                    t.name, leagueCatalog.nameKo(leagueId ?: 39), t.logoUrl, leagueId,
                     leagueOrder[engName] ?: 99))
             }
         }
@@ -498,171 +488,6 @@ class SoccerService(
         return players.sortedBy { it.sortOrder } +
                 teams.sortedBy   { it.sortOrder } +
                 leagues.sortedBy { it.sortOrder }
-    }
-
-    // ── 리그 플레이어 통계 ────────────────────────────────────
-
-    private fun leagueIdToEnglishName(leagueId: Int) = when (leagueId) {
-        39  -> "Premier League"
-        140 -> "La Liga"
-        78  -> "Bundesliga"
-        135 -> "Serie A"
-        61  -> "Ligue 1"
-        else -> ""
-    }
-
-    fun getLeaguePlayerStats(leagueId: Int, season: Int): LeaguePlayerStatsDto {
-        val leagueName = leagueIdToEnglishName(leagueId)
-        val rawStats   = playerSeasonStatRepository.findBySeasonAndLeagueName(season, leagueName)
-
-        // 선수별 중복 제거 (출장수 최대 기록 1개)
-        val stats = rawStats.groupBy { it.playerId }
-            .mapValues { (_, e) -> e.maxByOrNull { it.appearances }!! }
-            .values.toList()
-
-        val playerMap = playerRepository.findAllById(stats.map { it.playerId })
-            .associateBy { it.playerId }
-
-        fun rank(selector: (PlayerSeasonStatEntity) -> Double, minApps: Int = 1) =
-            stats.filter { selector(it) > 0 && it.appearances >= minApps }
-                .sortedByDescending { selector(it) }
-                .take(10)
-                .mapIndexed { i, s ->
-                    PlayerRankDto(
-                        rank        = i + 1,
-                        playerId    = s.playerId,
-                        playerName  = playerMap[s.playerId]?.name ?: "",
-                        photoUrl    = playerMap[s.playerId]?.photoUrl,
-                        value       = selector(s),
-                        appearances = s.appearances
-                    )
-                }
-
-        return LeaguePlayerStatsDto(
-            goalRanking        = rank({ it.goals.toDouble() }),
-            assistRanking      = rank({ it.assists.toDouble() }),
-            attackPointRanking = rank({ (it.goals + it.assists).toDouble() }),
-            ratingRanking      = rank({ it.rating ?: 0.0 }, minApps = 15)
-        )
-    }
-
-    // ── 리그 팀 통계 ──────────────────────────────────────────
-
-    fun getLeagueTeamStats(leagueId: Int, season: Int): LeagueTeamStatsDto {
-        val today   = java.time.LocalDate.now().toString()
-        val matches = matchRepository.findByLeagueIdAndSeason(leagueId, season)
-            .filter { it.matchDate <= today }
-
-        data class TS(var played: Int = 0, var goalsFor: Int = 0,
-                      var goalsAgainst: Int = 0, var cleanSheets: Int = 0)
-
-        val tsMap = mutableMapOf<String, TS>()
-        matches.forEach { m ->
-            // 종료된 경기만 (matchTime이 숫자나 "종료" 포함)
-            val finished = m.matchTime?.let {
-                it.contains("종료") || it.any { c -> c.isDigit() }
-            } ?: false
-            if (!finished) return@forEach
-
-            // "1 - 0", "1-0", "2:1" 등 다양한 형식 처리
-            val cleaned = m.score?.replace(" ", "") ?: return@forEach
-            val parts = cleaned.split("-", ":")
-                .mapNotNull { it.trim().toIntOrNull() }
-            if (parts.size < 2) return@forEach
-            val hg = parts[0]; val ag = parts[1]
-
-            tsMap.getOrPut(m.homeTeam) { TS() }.also {
-                it.played++; it.goalsFor += hg; it.goalsAgainst += ag
-                if (ag == 0) it.cleanSheets++
-            }
-            tsMap.getOrPut(m.awayTeam) { TS() }.also {
-                it.played++; it.goalsFor += ag; it.goalsAgainst += hg
-                if (hg == 0) it.cleanSheets++
-            }
-        }
-
-        val logoMap = teamRepository.findAll().associateBy { it.name }
-        fun tr(name: String, value: Double, display: String): TeamRankDto {
-            val t = logoMap[name]
-            return TeamRankDto(t?.teamId, name, t?.logoUrl, value, display)
-        }
-
-        val valid = tsMap.filter { it.value.played > 0 }
-
-        // 선수 평균 평점 (출장 5경기 이상만)
-        val leagueName = leagueIdToEnglishName(leagueId)
-        val avgRating = playerSeasonStatRepository.findBySeasonAndLeagueName(season, leagueName)
-            .filter { (it.rating ?: 0.0) > 0 && it.appearances >= 5 }
-            .groupBy { it.teamName }
-            .mapValues { (_, e) -> e.mapNotNull { it.rating }.average() }
-
-        return LeagueTeamStatsDto(
-            avgRatingRanking = avgRating
-                .map { (n, r) -> tr(n, r, "%.2f".format(r)) }
-                .sortedByDescending { it.value },
-
-            goalsPerGameRanking = valid
-                .map { (n, s) ->
-                    val v = s.goalsFor.toDouble() / s.played
-                    tr(n, v, "%.2f".format(v))
-                }.sortedByDescending { it.value },
-
-            concededPerGameRanking = valid
-                .map { (n, s) ->
-                    val v = s.goalsAgainst.toDouble() / s.played
-                    tr(n, v, "%.2f".format(v))
-                }.sortedBy { it.value },   // 낮은 순
-
-            cleanSheetRanking = valid
-                .map { (n, s) ->
-                    tr(n, s.cleanSheets.toDouble(), "${s.cleanSheets}회")
-                }.sortedByDescending { it.value }
-        )
-    }
-
-    // ── 리그 기본 정보 ─────────────────────────────────────────
-
-    fun getLeagueInfo(leagueId: Int): LeagueInfoDto? {
-        val league = leagueRepository.findById(leagueId).orElse(null) ?: return null
-        return LeagueInfoDto(
-            leagueId   = league.leagueId,
-            name       = league.name,
-            country    = league.country,
-            logoUrl    = league.logoUrl,
-            leagueType = league.leagueType
-        )
-    }
-
-    fun getLeagueMatches(leagueId: Int, season: Int): List<LeagueMatchDayDto> {
-        return matchRepository.findByLeagueIdAndSeason(leagueId, season)
-            .sortedWith(compareByDescending<MatchEntity> { it.matchDate }.thenByDescending { it.matchTime })
-            .groupBy { it.matchDate }
-            .map { (date, matches) ->
-                LeagueMatchDayDto(
-                    date    = date,
-                    matches = matches.map { m ->
-                        MatchDto(
-                            fixtureId   = m.fixtureId,
-                            homeTeam    = m.homeTeam,
-                            awayTeam    = m.awayTeam,
-                            homeTeamId  = m.homeTeamId,
-                            awayTeamId  = m.awayTeamId,
-                            matchDate   = m.matchDate,
-                            matchTime   = m.matchTime,
-                            score       = m.score,
-                            leagueId    = m.leagueId,
-                            season      = m.season,
-                            matchRound  = m.matchRound,
-                            stadium     = m.stadium,
-                            referee     = m.referee,
-                            homeLogoUrl = teamRepository.findById(m.homeTeamId ?: 0)
-                                .orElse(null)?.logoUrl,
-                            awayLogoUrl = teamRepository.findById(m.awayTeamId ?: 0)
-                                .orElse(null)?.logoUrl
-                        )
-                    }
-                )
-            }
     }
 
     fun getPlayerDetail(playerId: Long): PlayerDetailDto? {
@@ -705,7 +530,7 @@ class SoccerService(
             .groupBy { it.leagueId }
             .map { (lid, entries) ->
                 PlayerTrophyDto(
-                    trophyName = leagueIdToName(lid),
+                    trophyName = leagueCatalog.nameKo(lid),
                     count      = entries.size,
                     seasons    = entries.sortedByDescending { it.season }
                         .map { "${it.season}/${(it.season + 1).toString().takeLast(2)}" }
@@ -772,7 +597,7 @@ class SoccerService(
             .map { (lid, entries) ->
                 val sorted = entries.sortedByDescending { it.season }
                 TrophyDto(
-                    league        = leagueIdToName(lid),
+                    league        = leagueCatalog.nameKo(lid),
                     country       = null,
                     winCount      = entries.size,
                     lastWinSeason = "${sorted.first().season}/${(sorted.first().season + 1).toString().takeLast(2)}"
@@ -919,7 +744,7 @@ class SoccerService(
                 val sorted = entries.sortedByDescending { it.season }
                 TrophyDto(
                     league        = sorted.first().teamName.let {
-                        leagueIdToName(leagueId)
+                        leagueCatalog.nameKo(leagueId)
                     },
                     country       = null,
                     winCount      = entries.size,

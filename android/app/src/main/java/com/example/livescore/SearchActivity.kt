@@ -14,6 +14,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
+import com.example.livescore.league.LeagueDetailActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.livescore.databinding.ActivitySearchBinding
 import retrofit2.Call

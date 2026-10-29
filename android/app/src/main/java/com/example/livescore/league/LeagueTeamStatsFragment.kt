@@ -1,4 +1,4 @@
-package com.example.livescore
+package com.example.livescore.league
 
 import android.content.Intent
 import android.graphics.Color
@@ -9,22 +9,20 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.livescore.databinding.FragmentLeagueTeamStatsBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.*
+import com.example.livescore.common.renderState
 
 class LeagueTeamStatsFragment : Fragment() {
 
     private var _binding: FragmentLeagueTeamStatsBinding? = null
     private val binding get() = _binding!!
-    private var leagueId = 39
-    private var currentSeason = 2025
-    private var spinnerReady = false
-    private val seasons = (2025 downTo 2015).toList()
+    private lateinit var vm: LeagueDetailViewModel
+    private val leagueId get() = vm.leagueId
+    private val selectedSeason get() = vm.selectedSeason.value ?: 0
 
     companion object {
         fun newInstance(leagueId: Int) = LeagueTeamStatsFragment().apply {
-            arguments = Bundle().apply { putInt("leagueId", leagueId) }
+            arguments = Bundle().apply { putInt(ARG_LEAGUE_ID, leagueId) }
         }
     }
 
@@ -32,47 +30,24 @@ class LeagueTeamStatsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLeagueTeamStatsBinding.inflate(inflater, container, false)
-        leagueId = arguments?.getInt("leagueId") ?: 39
-        setupSpinner()
-        load()
         return binding.root
     }
 
-    private fun setupSpinner() {
-        val labels = seasons.map { "$it/${(it+1).toString().takeLast(2)}" }
-        binding.spinnerSeason.adapter = ArrayAdapter(requireContext(),
-            android.R.layout.simple_spinner_item, labels)
-            .also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-        binding.spinnerSeason.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
-                if (!spinnerReady) { spinnerReady = true; return }
-                currentSeason = seasons[pos]; load()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        vm = leagueViewModel()
+        binding.spinnerSeason.bindSeasons(viewLifecycleOwner, vm)
+        binding.errorView.btnRetry.setOnClickListener { vm.retry(vm.teamStats) }
+        vm.selectedSeason.observe(viewLifecycleOwner) { season -> if (season != null) vm.teamStats.load(season) }
+        vm.teamStats.state.observe(viewLifecycleOwner) { state ->
+            binding.layoutContent.removeAllViews()
+            renderState(state, binding.pbLoading, binding.errorView) { data ->
+                buildSection("선수단 평균 평점", data.avgRatingRanking)
+                buildSection("경기당 득점", data.goalsPerGameRanking)
+                buildSection("경기당 실점 (낮은 순)", data.concededPerGameRanking)
+                buildSection("클린시트", data.cleanSheetRanking)
             }
-            override fun onNothingSelected(p: AdapterView<*>?) {}
         }
-    }
-
-    private fun load() {
-        binding.pbLoading.visibility = View.VISIBLE
-        binding.layoutContent.removeAllViews()
-        RetrofitClient.apiService.getLeagueTeamStats(leagueId, currentSeason)
-            .enqueue(object : Callback<LeagueTeamStatsData> {
-                override fun onResponse(
-                    call: Call<LeagueTeamStatsData>, response: Response<LeagueTeamStatsData>
-                ) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                    val d = response.body() ?: return
-                    buildSection("선수단 평균 평점", d.avgRatingRanking)
-                    buildSection("경기당 득점", d.goalsPerGameRanking)
-                    buildSection("경기당 실점 (낮은 순)", d.concededPerGameRanking)
-                    buildSection("클린시트", d.cleanSheetRanking)
-                }
-                override fun onFailure(call: Call<LeagueTeamStatsData>, t: Throwable) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                }
-            })
     }
 
     private fun buildSection(title: String, teams: List<TeamRankData>) {

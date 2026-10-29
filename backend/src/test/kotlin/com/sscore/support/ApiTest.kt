@@ -43,6 +43,7 @@ abstract class ApiTest {
     fun resetFakes() {
         footballApi = MockRestServiceServer.bindTo(restTemplate).build()
         mail.clear()
+        clock.set(MutableClock.START)   // 스프링 컨텍스트가 테스트 클래스끼리 공유되므로 시계도 매번 처음으로 되돌린다
     }
 
     companion object {

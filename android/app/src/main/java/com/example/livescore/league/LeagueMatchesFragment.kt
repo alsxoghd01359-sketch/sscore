@@ -1,4 +1,4 @@
-package com.example.livescore
+package com.example.livescore.league
 
 import android.content.Intent
 import android.graphics.Color
@@ -16,21 +16,20 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.livescore.databinding.FragmentLeagueMatchesBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.livescore.*
+import com.example.livescore.common.renderState
 
 class LeagueMatchesFragment : Fragment() {
 
     private var _binding: FragmentLeagueMatchesBinding? = null
     private val binding get() = _binding!!
-    private var leagueId = 39
-    private var currentSeason = 2025
-    private val seasons = (2025 downTo 2015).toList()
+    private lateinit var vm: LeagueDetailViewModel
+    private val leagueId get() = vm.leagueId
+    private val selectedSeason get() = vm.selectedSeason.value ?: 0
 
     companion object {
         fun newInstance(leagueId: Int) = LeagueMatchesFragment().apply {
-            arguments = Bundle().apply { putInt("leagueId", leagueId) }
+            arguments = Bundle().apply { putInt(ARG_LEAGUE_ID, leagueId) }
         }
     }
 
@@ -38,50 +37,21 @@ class LeagueMatchesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLeagueMatchesBinding.inflate(inflater, container, false)
-        leagueId = arguments?.getInt("leagueId") ?: 39
-        setupSeasonSpinner()
-        loadMatches()
         return binding.root
     }
 
-    private var spinnerReady = false
-
-    private fun setupSeasonSpinner() {
-        val labels = seasons.map { "$it/${(it+1).toString().takeLast(2)}" }
-        val adapter = ArrayAdapter(requireContext(),
-            android.R.layout.simple_spinner_item, labels)
-            .also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-        binding.spinnerSeason.adapter = adapter
-        binding.spinnerSeason.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
-                if (!spinnerReady) { spinnerReady = true; return }
-                currentSeason = seasons[pos]
-                loadMatches()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        vm = leagueViewModel()
+        binding.spinnerSeason.bindSeasons(viewLifecycleOwner, vm)
+        binding.errorView.btnRetry.setOnClickListener { vm.retry(vm.matches) }
+        vm.selectedSeason.observe(viewLifecycleOwner) { season -> if (season != null) vm.matches.load(season) }
+        vm.matches.state.observe(viewLifecycleOwner) { state ->
+            binding.layoutMatchDays.removeAllViews()
+            renderState(state, binding.pbLoading, binding.errorView) { data ->
+                data.forEach { renderMatchDay(it) }
             }
-            override fun onNothingSelected(p: AdapterView<*>?) {}
         }
-    }
-
-    private fun loadMatches() {
-        binding.pbLoading.visibility = View.VISIBLE
-        binding.layoutMatchDays.removeAllViews()
-
-        RetrofitClient.apiService.getLeagueMatches(leagueId, currentSeason)
-            .enqueue(object : Callback<List<LeagueMatchDayData>> {
-                override fun onResponse(
-                    call: Call<List<LeagueMatchDayData>>,
-                    response: Response<List<LeagueMatchDayData>>
-                ) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                    val days = response.body() ?: return
-                    days.forEach { renderMatchDay(it) }
-                }
-                override fun onFailure(call: Call<List<LeagueMatchDayData>>, t: Throwable) {
-                    if (!isAdded || _binding == null) return
-                    binding.pbLoading.visibility = View.GONE
-                }
-            })
     }
 
     private fun renderMatchDay(day: LeagueMatchDayData) {
@@ -146,7 +116,7 @@ class LeagueMatchesFragment : Fragment() {
                         putExtra("matchTime",  match.matchTime)
                         putExtra("score",      match.score)
                         putExtra("leagueId",   leagueId)
-                        putExtra("season",     currentSeason)
+                        putExtra("season",     selectedSeason)
                     })
                 }
             }

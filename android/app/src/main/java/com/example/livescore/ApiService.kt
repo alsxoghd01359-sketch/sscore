@@ -38,27 +38,6 @@ interface ApiService {
     @GET("/api/soccer/search")
     fun search(@Query("q") q: String): Call<List<SearchResultData>>
 
-    @GET("/api/soccer/league/{leagueId}")
-    fun getLeagueInfo(@Path("leagueId") leagueId: Int): Call<LeagueInfoData>
-
-    @GET("/api/soccer/league/{leagueId}/player-stats")
-    fun getLeaguePlayerStats(
-        @Path("leagueId") leagueId: Int,
-        @Query("season") season: Int
-    ): Call<LeaguePlayerStatsData>
-
-    @GET("/api/soccer/league/{leagueId}/team-stats")
-    fun getLeagueTeamStats(
-        @Path("leagueId") leagueId: Int,
-        @Query("season") season: Int
-    ): Call<LeagueTeamStatsData>
-
-    @GET("/api/soccer/league/{leagueId}/matches")
-    fun getLeagueMatches(
-        @Path("leagueId") leagueId: Int,
-        @Query("season") season: Int
-    ): Call<List<LeagueMatchDayData>>
-
     @GET("/api/soccer/player/{playerId}/matches")
     fun getPlayerMatches(@Path("playerId") playerId: Long): Call<List<PlayerMatchRecordData>>
 

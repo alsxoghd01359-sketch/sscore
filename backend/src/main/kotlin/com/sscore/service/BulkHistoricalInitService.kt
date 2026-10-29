@@ -1,6 +1,7 @@
 package com.sscore.service
 
 import com.sscore.common.ApiException
+import com.sscore.league.LeagueCatalog
 import com.sscore.repository.TeamRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -19,20 +20,10 @@ import org.springframework.stereotype.Service
 @Service
 class BulkHistoricalInitService(
     private val apiService: ApiFootballService,
-    private val teamRepository: TeamRepository
+    private val teamRepository: TeamRepository,
+    private val catalog: LeagueCatalog
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-
-    companion object {
-        val LEAGUE_IDS   = listOf(39, 140, 78, 135, 61)
-        val LEAGUE_NAMES = mapOf(
-            39  to "프리미어리그",
-            140 to "라리가",
-            78  to "분데스리가",
-            135 to "세리에 A",
-            61  to "리그 1"
-        )
-    }
 
     // ─── 진행 상황 (volatile → 스레드 간 가시성 보장) ───────────────────
     @Volatile var isRunning     = false
@@ -52,15 +43,15 @@ class BulkHistoricalInitService(
         resetCounters()
 
         val seasons = (fromSeason..toSeason).toList()
-        total = seasons.size * LEAGUE_IDS.size * 2   // 팀 sync + 경기 sync
+        total = seasons.size * catalog.ids().size * 2   // 팀 sync + 경기 sync
 
         launchBackground("Phase1-TeamFixtures") {
             for (season in seasons) {
                 if (isCancelled) break
 
-                for (leagueId in LEAGUE_IDS) {
+                for (leagueId in catalog.ids()) {
                     if (isCancelled) break
-                    val leagueName = LEAGUE_NAMES[leagueId]
+                    val leagueName = catalog.nameKo(leagueId)
 
                     // 1-A. 팀 동기화
                     currentStatus = "팀 동기화 중: $leagueName $season 시즌 (${progress + 1}/$total)"

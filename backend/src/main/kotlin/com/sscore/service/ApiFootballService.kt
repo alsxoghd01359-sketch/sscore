@@ -9,6 +9,7 @@ import com.sscore.entity.PlayerSeasonStatEntity
 import com.sscore.entity.TeamEntity
 import com.sscore.football.FixtureParser
 import com.sscore.football.FootballApiClient
+import com.sscore.league.LeagueCatalog
 import com.sscore.repository.ChampionRepository
 import com.sscore.repository.MatchRepository
 import com.sscore.repository.PlayerRepository
@@ -27,11 +28,10 @@ class ApiFootballService(
     private val playerRepository: PlayerRepository,
     private val playerSeasonStatRepository: PlayerSeasonStatRepository,
     private val matchRepository: MatchRepository,
-    private val championRepository: ChampionRepository
+    private val championRepository: ChampionRepository,
+    private val catalog: LeagueCatalog
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-
-    private val top5LeagueIds = listOf(39, 140, 78, 135, 61)
 
     // ─────────────────────────────────────────────
     // 팀 동기화
@@ -241,7 +241,7 @@ class ApiFootballService(
 
     // 시즌 전체 경기 (5대 리그). 한 리그라도 외부 API 오류가 나면 전체를 실패시켜 일부만 저장되는 일이 없게 한다.
     fun fetchMatchesBySeason(season: Int): List<MatchDto> =
-        top5LeagueIds.flatMap { leagueId ->
+        catalog.ids().flatMap { leagueId ->
             parseFixtures(football.list("/fixtures", "league" to leagueId, "season" to season))
         }
 
@@ -341,7 +341,7 @@ class ApiFootballService(
                         val stTeam = st["team"] as? Map<*, *>
                         (stLeague?.get("season") as? Number)?.toInt() == season &&
                             (stTeam?.get("id") as? Number)?.toInt() == teamId &&
-                            (stLeague?.get("id") as? Number)?.toInt() in top5LeagueIds
+                            (stLeague?.get("id") as? Number)?.toInt() in catalog.ids()
                     }
                     .maxByOrNull { st -> ((st["games"] as? Map<*, *>)?.get("appearences") as? Number)?.toInt() ?: 0 }
                     ?: continue
