@@ -91,6 +91,62 @@
             android:textSize="13sp"
             android:visibility="gone" />
 
+        <!-- 응원 팀 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="8dp"
+            android:text="응원 팀"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvSupportedTeam"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="아직 정하지 않았어요."
+            android:textColor="@color/text_primary"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="응원 팀은 자동으로 팔로우되고 순위표에서 강조돼요."
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnPickTeam"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/accent"
+            android:text="응원 팀 선택"
+            android:textColor="@color/on_accent"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btnClearTeam"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="4dp"
+            android:text="응원 팀 해제"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvTeamNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
         <!-- 비밀번호 -->
         <TextView
             android:layout_width="wrap_content"

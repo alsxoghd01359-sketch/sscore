@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.livescore.auth.SessionManager
 
 class StandingsAdapter(
     private val list: List<StandingData>,
@@ -37,7 +38,8 @@ class StandingsAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val s = list[position]
-        val isHighlight = s.teamId == currentHomeTeamId || s.teamId == currentAwayTeamId
+        val supported = SessionManager.member.value?.supportedTeamId
+        val isHighlight = s.teamId == currentHomeTeamId || s.teamId == currentAwayTeamId || s.teamId == supported
 
         // 기본 텍스트 색
         val nameColor = if (isHighlight) Color.parseColor("#F2711C") else Color.parseColor("#1A1A1A")

@@ -4,6 +4,8 @@ import com.sscore.auth.MemberSummary
 import com.sscore.auth.SessionService
 import com.sscore.auth.toSummary
 import com.sscore.common.ApiException
+import com.sscore.follow.FollowService
+import com.sscore.repository.TeamRepository
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -12,7 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -27,7 +32,9 @@ data class ChangeNicknameRequest(val nickname: String? = null)
 class MemberProfileService(
     private val members: MemberRepository,
     private val sessions: SessionService,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val teams: TeamRepository,
+    private val follows: FollowService
 ) {
     // 현재 비밀번호를 확인한 뒤 바꾸고, 이 기기를 뺀 다른 기기의 로그인을 모두 푼다.
     @Transactional
@@ -63,6 +70,24 @@ class MemberProfileService(
         return member.toSummary()
     }
 
+    // 응원 팀을 지정(변경)한다. 그 팀은 자동으로 팔로우되고, 이전 응원 팀의 팔로우는 그대로 남는다.
+    @Transactional
+    fun setSupportedTeam(memberId: Int, teamId: Int): MemberSummary {
+        if (!teams.existsById(teamId)) throw ApiException(HttpStatus.NOT_FOUND, "TEAM_NOT_FOUND", "팀을 찾을 수 없습니다.")
+        val member = load(memberId)
+        member.supportedTeamId = teamId
+        follows.followTeam(memberId, teamId)
+        return member.toSummary()
+    }
+
+    // 응원 팀을 비운다. 팔로우는 그대로 둔다.
+    @Transactional
+    fun clearSupportedTeam(memberId: Int): MemberSummary {
+        val member = load(memberId)
+        member.supportedTeamId = null
+        return member.toSummary()
+    }
+
     private fun load(memberId: Int): Member = members.findById(memberId).orElseThrow {
         ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "로그인이 필요합니다.")
     }
@@ -82,6 +107,14 @@ class MemberProfileController(private val profile: MemberProfileService) {
         profile.changePassword(jwt.subject.toInt(), jwt.getClaimAsString("sid"), request)
         return ResponseEntity.noContent().build()
     }
+
+    @PutMapping("/supported-team/{teamId}")
+    fun setSupportedTeam(@AuthenticationPrincipal jwt: Jwt, @PathVariable teamId: Int): MemberSummary =
+        profile.setSupportedTeam(jwt.subject.toInt(), teamId)
+
+    @DeleteMapping("/supported-team")
+    fun clearSupportedTeam(@AuthenticationPrincipal jwt: Jwt): MemberSummary =
+        profile.clearSupportedTeam(jwt.subject.toInt())
 
     @PatchMapping("/nickname")
     fun changeNickname(

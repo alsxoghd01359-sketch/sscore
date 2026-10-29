@@ -24,7 +24,7 @@ data class LoginRequest(val email: String? = null, val password: String? = null)
 
 data class RefreshRequest(val refreshToken: String? = null)
 
-data class MemberSummary(val memberId: Int, val email: String, val nickname: String, val role: String)
+data class MemberSummary(val memberId: Int, val email: String, val nickname: String, val role: String, val supportedTeamId: Int? = null)
 
 data class LoginResponse(
     val accessToken: String,
@@ -34,7 +34,7 @@ data class LoginResponse(
     val member: MemberSummary
 )
 
-fun Member.toSummary() = MemberSummary(userId!!, email, nickname, role.name)
+fun Member.toSummary() = MemberSummary(userId!!, email, nickname, role.name, supportedTeamId)
 
 @Service
 class LoginService(

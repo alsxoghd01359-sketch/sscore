@@ -27,6 +27,12 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private lateinit var adapter: SearchResultAdapter
     private val viewModel: SearchViewModel by viewModels()
+    private val pickTeam get() = intent.getBooleanExtra(EXTRA_PICK_TEAM, false)   // 응원 팀 고르기: 팀만 보여 주고 고르면 돌려준다
+
+    companion object {
+        const val EXTRA_PICK_TEAM = "pickTeam"
+        const val RESULT_TEAM_ID = "teamId"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,13 +97,20 @@ class SearchActivity : AppCompatActivity() {
         binding.tvEmpty.visibility = if (message != null) View.VISIBLE else View.GONE
 
         when (state) {
-            is SearchState.Results -> adapter.submitList(state.items)
+            is SearchState.Results -> adapter.submitList(if (pickTeam) state.items.filter { it.type == "TEAM" } else state.items)
             is SearchState.Error -> binding.errorView.tvErrorMessage.text = state.message
             else -> adapter.submitList(emptyList())
         }
     }
 
     private fun navigateTo(item: SearchResultData) {
+        if (pickTeam) {
+            if (item.type == "TEAM") {
+                setResult(RESULT_OK, Intent().putExtra(RESULT_TEAM_ID, item.id.toInt()))
+                finish()
+            }
+            return
+        }
         when (item.type) {
             "PLAYER" -> startActivity(
                 Intent(this, PlayerDetailActivity::class.java).apply {

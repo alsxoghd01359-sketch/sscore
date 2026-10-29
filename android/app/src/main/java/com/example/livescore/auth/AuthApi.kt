@@ -20,7 +20,7 @@ data class SignupStartedData(val email: String, val expiresInSeconds: Long, val 
 data class SignupCompletedData(val memberId: Int, val email: String, val nickname: String)
 data class NicknameAvailabilityData(val available: Boolean, val message: String? = null)
 
-data class MemberData(val memberId: Int, val email: String, val nickname: String, val role: String)
+data class MemberData(val memberId: Int, val email: String, val nickname: String, val role: String, val supportedTeamId: Int? = null)
 
 data class LoginResponseData(
     val accessToken: String,

@@ -18,6 +18,7 @@ object SessionManager {
     private const val KEY_EMAIL = "email"
     private const val KEY_NICKNAME = "nickname"
     private const val KEY_ROLE = "role"
+    private const val KEY_SUPPORTED_TEAM = "supported_team"
 
     private var prefs: SharedPreferences? = null
 
@@ -52,7 +53,8 @@ object SessionManager {
         if (id != -1 && accessToken != null && refreshToken != null) {
             _member.value = MemberData(
                 id, p.getString(KEY_EMAIL, "").orEmpty(), p.getString(KEY_NICKNAME, "").orEmpty(),
-                p.getString(KEY_ROLE, "USER").orEmpty()
+                p.getString(KEY_ROLE, "USER").orEmpty(),
+                p.getInt(KEY_SUPPORTED_TEAM, -1).takeIf { it != -1 }
             )
         }
     }
@@ -73,6 +75,7 @@ object SessionManager {
             ?.putString(KEY_EMAIL, login.member.email)
             ?.putString(KEY_NICKNAME, login.member.nickname)
             ?.putString(KEY_ROLE, login.member.role)
+            ?.putInt(KEY_SUPPORTED_TEAM, login.member.supportedTeamId ?: -1)
             ?.apply()
         _member.postValue(login.member)
     }
@@ -84,6 +87,7 @@ object SessionManager {
             ?.putString(KEY_EMAIL, member.email)
             ?.putString(KEY_NICKNAME, member.nickname)
             ?.putString(KEY_ROLE, member.role)
+            ?.putInt(KEY_SUPPORTED_TEAM, member.supportedTeamId ?: -1)
             ?.apply()
         _member.postValue(member)
     }

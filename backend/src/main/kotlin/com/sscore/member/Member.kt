@@ -44,7 +44,10 @@ class Member(
     val createdAt: LocalDateTime,
 
     @Column(name = "withdrawn_at")
-    var withdrawnAt: LocalDateTime? = null
+    var withdrawnAt: LocalDateTime? = null,
+
+    @Column(name = "supported_team_id")
+    var supportedTeamId: Int? = null
 )
 
 @Repository

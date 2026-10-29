@@ -1,6 +1,9 @@
 package com.example.livescore.member
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import android.view.View
 import android.text.InputType
 import android.widget.EditText
@@ -14,12 +17,20 @@ import com.example.livescore.R
 import com.example.livescore.auth.SessionManager
 import com.example.livescore.auth.logout
 import com.example.livescore.databinding.ActivityProfileBinding
+import com.example.livescore.search.SearchActivity
 
 // 내 정보: 닉네임 변경, 비밀번호 변경, 로그아웃
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileBinding
     private val viewModel: ProfileViewModel by viewModels()
+
+    // 검색 화면에서 팀을 골라 돌아오면 응원 팀으로 지정한다
+    private val pickTeam = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.getIntExtra(SearchActivity.RESULT_TEAM_ID, -1)?.takeIf { it != -1 }?.let { viewModel.setSupportedTeam(it) }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +43,16 @@ class ProfileActivity : AppCompatActivity() {
             viewModel.changePassword(binding.etCurrentPassword.text.toString(), binding.etNewPassword.text.toString())
         }
         binding.btnWithdraw.setOnClickListener { confirmWithdraw() }
+        binding.btnPickTeam.setOnClickListener {
+            pickTeam.launch(Intent(this, SearchActivity::class.java).apply { putExtra(SearchActivity.EXTRA_PICK_TEAM, true) })
+        }
+        binding.btnClearTeam.setOnClickListener { viewModel.clearSupportedTeam() }
+        viewModel.supportedTeamName.observe(this) { name ->
+            binding.tvSupportedTeam.text = name ?: "아직 정하지 않았어요."
+            binding.btnClearTeam.visibility = if (name == null) View.GONE else View.VISIBLE
+        }
+        viewModel.teamNotice.observe(this) { show(binding.tvTeamNotice, it) }
+        viewModel.refreshMe()
         binding.btnLogout.setOnClickListener {
             logout()
             Toast.makeText(this, "로그아웃했습니다.", Toast.LENGTH_SHORT).show()
@@ -45,6 +66,7 @@ class ProfileActivity : AppCompatActivity() {
                 return@observe
             }
             binding.tvEmail.text = member.email
+            viewModel.showSupportedTeam(member.supportedTeamId)
             if (!binding.etNickname.hasFocus()) binding.etNickname.setText(member.nickname)
         }
         viewModel.loading.observe(this) { loading ->

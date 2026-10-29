@@ -5,6 +5,10 @@ import com.example.livescore.common.ApiResult
 import com.example.livescore.common.apiCall
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.GET
+import retrofit2.http.PUT
+import retrofit2.http.Path
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 
@@ -22,6 +26,15 @@ interface MemberApi {
 
     @PATCH("/api/members/me/nickname")
     suspend fun changeNickname(@Body body: ChangeNicknameBody): Response<MemberData>
+
+    @GET("/api/auth/me")
+    suspend fun me(): Response<MemberData>
+
+    @PUT("/api/members/me/supported-team/{teamId}")
+    suspend fun setSupportedTeam(@Path("teamId") teamId: Int): Response<MemberData>
+
+    @DELETE("/api/members/me/supported-team")
+    suspend fun clearSupportedTeam(): Response<MemberData>
 }
 
 class MemberRepository(private val api: MemberApi) {
@@ -33,4 +46,8 @@ class MemberRepository(private val api: MemberApi) {
 
     suspend fun changeNickname(nickname: String): ApiResult<MemberData> =
         apiCall { api.changeNickname(ChangeNicknameBody(nickname)) }
+
+    suspend fun me(): ApiResult<MemberData> = apiCall { api.me() }
+    suspend fun setSupportedTeam(teamId: Int): ApiResult<MemberData> = apiCall { api.setSupportedTeam(teamId) }
+    suspend fun clearSupportedTeam(): ApiResult<MemberData> = apiCall { api.clearSupportedTeam() }
 }
