@@ -21,6 +21,10 @@ suspend fun <T> apiCall(block: suspend () -> Response<T>): ApiResult<T> {
         val body = response.body()
         if (response.isSuccessful && body != null) {
             ApiResult.Success(body)
+        } else if (response.code() == 204 || response.code() == 205) {
+            // 본문이 없는 성공 응답(Response<Unit>)은 Retrofit이 body를 null로 주므로 따로 성공 처리한다
+            @Suppress("UNCHECKED_CAST")
+            ApiResult.Success(Unit as T)
         } else {
             val error = runCatching { gson.fromJson(response.errorBody()?.string(), ApiErrorBody::class.java) }.getOrNull()
             ApiResult.Failure(
