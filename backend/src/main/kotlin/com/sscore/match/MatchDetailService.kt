@@ -192,6 +192,43 @@ class MatchDetailService(
         }
     }
 
+    // ── 지난 경기 일괄 적재 ──────────────────────────────────────
+
+    // 끝난 지난 경기의 확정본(타임라인·선수 기록·라인업)을 저장한다. 이미 있으면 건너뛴다. 쓴 외부 호출 횟수를 돌려준다.
+    // /fixtures?id= 응답에 라인업도 들어 있어 보통 1번이면 되고, 없을 때만 라인업을 따로 받는다.
+    fun backfillFull(fixtureId: Long): Int {
+        val match = requireMatch(fixtureId)
+        val row = details.findById(fixtureId).orElse(null)
+        var calls = 0
+        var lineupsKnown = row?.lineupsJson != null
+        if (row?.infoJson == null) {
+            val raw = apiService.fetchFixtureDetails(fixtureId)
+            calls++
+            if (raw == null) return calls
+            storeInfo(fixtureId, MatchInfoBuilder.build(fixtureId, match, raw) { playerStats.findByFixtureId(fixtureId) })
+            if (!lineupsKnown) {
+                val fromRaw = (raw["lineups"] as? List<*>)?.filterIsInstance<Map<*, *>>().orEmpty()
+                if (fromRaw.isNotEmpty()) {
+                    storeLineups(fixtureId, apiService.parseLineups(fromRaw))
+                    lineupsKnown = true
+                }
+            }
+        }
+        if (!lineupsKnown) {
+            storeLineups(fixtureId, apiService.fetchLineups(fixtureId))
+            calls++
+        }
+        return calls
+    }
+
+    // 라인업만 저장한다. 라인업이 없는 옛 경기는 빈 목록으로 저장해 다시 받지 않는다. 쓴 외부 호출 횟수를 돌려준다.
+    fun backfillLineups(fixtureId: Long): Int {
+        requireMatch(fixtureId)
+        if (details.findById(fixtureId).orElse(null)?.lineupsJson != null) return 0
+        storeLineups(fixtureId, apiService.fetchLineups(fixtureId))
+        return 1
+    }
+
     // ── 상대전적 ────────────────────────────────────────────────
 
     fun getH2H(homeId: Int, awayId: Int): H2HSummaryDto {

@@ -264,7 +264,11 @@ class ApiFootballService(
     // 라인업 조회
     // ─────────────────────────────────────────────
     fun fetchLineups(fixtureId: Long): List<LineupDto> =
-        football.list("/fixtures/lineups", "fixture" to fixtureId).map { teamData ->
+        parseLineups(football.list("/fixtures/lineups", "fixture" to fixtureId))
+
+    // /fixtures/lineups 의 응답과 /fixtures?id= 응답의 "lineups" 항목은 모양이 같다
+    fun parseLineups(items: List<Map<*, *>>): List<LineupDto> =
+        items.map { teamData ->
             val team = teamData["team"] as? Map<*, *>
             val coach = teamData["coach"] as? Map<*, *>
             val startXI = (teamData["startXI"] as? List<*>)?.filterIsInstance<Map<*, *>>() ?: emptyList()

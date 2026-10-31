@@ -22,7 +22,8 @@ class AdminController(
     private val catalog: LeagueCatalog,
     private val bulkInitService: BulkHistoricalInitService,
     private val plHistorySeed: PremierLeagueHistorySeed,
-    private val push: PushService
+    private val push: PushService,
+    private val backfill: MatchBackfillService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -41,6 +42,33 @@ class AdminController(
         val to = end ?: from
         imports.saveSeasonsRange(from, to)
         return "$from~$to 시즌 경기 데이터를 적재했습니다."
+    }
+
+    /**
+     * 지난 시즌 끝난 경기의 상세를 채운다. detailFrom 시즌 이후는 타임라인·선수 기록·라인업 전부, 그 이전은 라인업만.
+     * 최근 시즌부터 채우고, 이미 있는 경기는 건너뛴다. maxCalls는 한 번에 쓸 외부 호출 수(하루 한도를 고려해 정한다).
+     * 시즌 값은 시작 연도이다 (2020 = 20/21).
+     */
+    @PostMapping("/matches/backfill")
+    fun startBackfill(
+        @RequestParam(defaultValue = "2015") from: Int,
+        @RequestParam(required = false) to: Int?,
+        @RequestParam(defaultValue = "2020") detailFrom: Int,
+        @RequestParam(defaultValue = "5000") maxCalls: Int,
+        @RequestParam(defaultValue = "300") delayMs: Long
+    ): String {
+        val last = to ?: seasons.current()
+        if (!backfill.start(from, last, detailFrom, maxCalls, delayMs)) return "이미 실행 중입니다. GET /api/admin/matches/backfill/status 로 확인하세요."
+        return "$from~$last 시즌 상세 채우기를 시작했습니다 (상세는 $detailFrom 시즌부터, 호출 한도 $maxCalls). 진행 상황은 status 로 확인하세요."
+    }
+
+    @GetMapping("/matches/backfill/status")
+    fun backfillStatus(): BackfillStatus = backfill.status()
+
+    @PostMapping("/matches/backfill/cancel")
+    fun cancelBackfill(): String {
+        backfill.cancel()
+        return "취소를 요청했습니다. 진행 중인 경기까지만 처리하고 멈춥니다."
     }
 
     /** 선수 스탯(평점·출전시간) 일괄 수집 */
