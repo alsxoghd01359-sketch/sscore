@@ -295,6 +295,10 @@ class ApiFootballService(
             )
         }
 
+    // 리그·시즌의 부상/결장 명단 전체 (한 번에 온다)
+    fun fetchInjuries(leagueId: Int, season: Int): List<Map<*, *>> =
+        football.list("/injuries", "league" to leagueId, "season" to season)
+
     // ─────────────────────────────────────────────
     // 경기 상세 정보 (통계/이벤트용). 없는 경기면 null
     // ─────────────────────────────────────────────

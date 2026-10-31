@@ -90,6 +90,7 @@ class MatchDetailService(
     private val details: MatchDetailRepository,
     private val playerStats: PlayerStatRepository,
     private val matchEvents: MatchEventRepository,
+    private val teamStats: MatchTeamStatRepository,
     private val apiService: ApiFootballService,
     private val json: JsonMapper,
     private val clock: Clock,
@@ -133,8 +134,12 @@ class MatchDetailService(
         return built.info
     }
 
-    // 선수 기록·타임라인·확정본을 한 트랜잭션으로 저장한다
+    // 선수 기록·타임라인·팀 통계·확정본을 한 트랜잭션으로 저장한다
     private fun storeInfo(fixtureId: Long, built: BuiltMatchInfo) = tx.executeWithoutResult {
+        if (built.teamStats.isNotEmpty()) {
+            teamStats.deleteByFixtureId(fixtureId)
+            teamStats.saveAll(built.teamStats)
+        }
         if (built.playerStats.isNotEmpty()) {
             playerStats.deleteByFixtureId(fixtureId)
             playerStats.saveAll(built.playerStats)
@@ -201,7 +206,8 @@ class MatchDetailService(
         val row = details.findById(fixtureId).orElse(null)
         var calls = 0
         var lineupsKnown = row?.lineupsJson != null
-        if (row?.infoJson == null) {
+        // 확정본이 있어도 팀 통계가 아직 없으면(통계 테이블을 만들기 전에 저장된 경기) 다시 받는다
+        if (row?.infoJson == null || !teamStats.existsByFixtureId(fixtureId)) {
             val raw = apiService.fetchFixtureDetails(fixtureId)
             calls++
             if (raw == null) return calls

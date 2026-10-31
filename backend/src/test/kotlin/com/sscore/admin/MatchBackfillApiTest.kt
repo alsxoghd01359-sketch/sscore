@@ -4,7 +4,9 @@ import com.jayway.jsonpath.JsonPath
 import com.sscore.auth.AuthSessionRepository
 import com.sscore.entity.MatchEntity
 import com.sscore.entity.TeamEntity
+import com.sscore.match.InjuryRepository
 import com.sscore.match.MatchDetailRepository
+import com.sscore.match.MatchTeamStatRepository
 import com.sscore.member.Member
 import com.sscore.member.MemberRepository
 import com.sscore.member.MemberRole
@@ -41,6 +43,8 @@ class MatchBackfillApiTest : ApiTest() {
     @Autowired private lateinit var details: MatchDetailRepository
     @Autowired private lateinit var playerStats: PlayerStatRepository
     @Autowired private lateinit var events: MatchEventRepository
+    @Autowired private lateinit var teamStats: MatchTeamStatRepository
+    @Autowired private lateinit var injuryRepository: InjuryRepository
 
     private val base = "https://v3.football.api-sports.io"
     private val password = "Passw0rd!"
@@ -48,7 +52,8 @@ class MatchBackfillApiTest : ApiTest() {
 
     @BeforeEach
     fun seed() {
-        details.deleteAll(); playerStats.deleteAll(); events.deleteAll(); matches.deleteAll(); teams.deleteAll()
+        details.deleteAll(); playerStats.deleteAll(); events.deleteAll(); teamStats.deleteAll(); injuryRepository.deleteAll()
+        matches.deleteAll(); teams.deleteAll()
         sessions.deleteAll(); members.deleteAll()
         teams.save(TeamEntity(42, "Arsenal", "England", "arsenal.png"))
         teams.save(TeamEntity(49, "Chelsea", "England", "chelsea.png"))
@@ -79,12 +84,17 @@ class MatchBackfillApiTest : ApiTest() {
     private val lineupTeam = """{"team":{"name":"Arsenal"},"formation":"4-3-3","coach":{"name":"Arteta"},
         "startXI":[{"player":{"id":1,"name":"Raya","number":22,"pos":"G","grid":"1:1"}}],"substitutes":[]}"""
 
-    private fun fixtureDetails(id: Long, withLineups: Boolean) = """
+    private val teamStatistics = """[
+        {"team":{"id":42},"statistics":[{"type":"Ball Possession","value":"60%"},{"type":"Total Shots","value":12},
+          {"type":"Shots on Goal","value":5},{"type":"Yellow Cards","value":null},{"type":"expected_goals","value":"1.83"}]},
+        {"team":{"id":49},"statistics":[{"type":"Ball Possession","value":"40%"},{"type":"expected_goals","value":"0.7"}]}]"""
+
+    private fun fixtureDetails(id: Long, withLineups: Boolean, withStats: Boolean = true) = """
         {"errors":[],"response":[{
           "fixture":{"id":$id,"date":"2021-10-01T14:00:00+00:00","referee":"M. Oliver","status":{"short":"FT"}},
           "events":[{"time":{"elapsed":23,"extra":null},"team":{"id":42,"name":"Arsenal"},"player":{"name":"B. Saka"},
                      "assist":{"name":"M. Odegaard"},"type":"Goal","detail":"Normal Goal"}],
-          "statistics":[],
+          "statistics":${if (withStats) teamStatistics else "[]"},
           "players":[{"team":{"id":42,"name":"Arsenal"},"players":[
                        {"player":{"id":10,"name":"B. Saka"},"statistics":[{"games":{"minutes":90,"position":"F","rating":"8.1"}}]}]}],
           "lineups":${if (withLineups) "[$lineupTeam]" else "[]"}
@@ -112,6 +122,83 @@ class MatchBackfillApiTest : ApiTest() {
         assertTrue(row.lineupsJson!!.contains("Raya"))
         assertEquals(1, playerStats.findByFixtureId(700).size)
         assertEquals(1, events.findAll().size)
+    }
+
+    @Test
+    fun `팀 통계를 홈 원정별로 저장하고 xG는 소수로 받는다`() {
+        match(700, 2021)
+        footballApi.expect(requestTo("$base/fixtures?id=700")).andRespond(ok(fixtureDetails(700, withLineups = true)))
+
+        backfill("from=2021&to=2021").andExpect { status { isOk() } }
+
+        val stats = teamStats.findByFixtureId(700).associateBy { it.teamId }
+        assertEquals(2, stats.size)
+        val home = stats.getValue(42)
+        assertTrue(home.home)
+        assertEquals(60, home.possession)
+        assertEquals(12, home.shotsTotal)
+        assertEquals(5, home.shotsOnGoal)
+        assertNull(home.yellowCards)            // API가 null로 준 값은 비워 둔다
+        assertEquals("1.83", home.expectedGoals.toString())
+        assertEquals("0.70", stats.getValue(49).expectedGoals.toString())
+        assertEquals(false, stats.getValue(49).home)
+    }
+
+    @Test
+    fun `통계가 없는 경기도 빈 통계 두 줄을 남겨 다시 받지 않는다`() {
+        match(708, 2021)
+        footballApi.expect(requestTo("$base/fixtures?id=708")).andRespond(ok(fixtureDetails(708, withLineups = true, withStats = false)))
+        backfill("from=2021&to=2021").andExpect { status { isOk() } }
+        val stats = teamStats.findByFixtureId(708)
+        assertEquals(2, stats.size)
+        assertTrue(stats.all { it.possession == null && it.expectedGoals == null })
+
+        freshFootballApi()   // 기대값이 없으므로 다시 호출하면 실패로 집계된다
+        backfill("from=2021&to=2021").andExpect { status { isOk() } }
+        status().andExpect { jsonPath("$.calls") { value(0) }; jsonPath("$.failed") { value(0) } }
+    }
+
+    @Test
+    fun `확정본은 있지만 팀 통계가 없는 경기는 한 번 더 받아 통계를 채운다`() {
+        match(709, 2021)
+        details.save(com.sscore.match.MatchDetail(709, infoJson = "{\"fixtureId\":709}", lineupsJson = "[]", finalizedAt = LocalDateTime.now(clock)))
+        footballApi.expect(requestTo("$base/fixtures?id=709")).andRespond(ok(fixtureDetails(709, withLineups = true)))
+
+        backfill("from=2021&to=2021").andExpect { status { isOk() } }
+
+        footballApi.verify()
+        assertEquals(2, teamStats.findByFixtureId(709).size)
+        status().andExpect { jsonPath("$.calls") { value(1) } }
+    }
+
+    // ── 부상/결장 명단 ──────────────────────────────────────────
+
+    private val injuriesResponse = """
+        {"errors":[],"response":[
+          {"player":{"id":7,"name":"B. Saka","type":"Missing Fixture","reason":"Thigh Injury"},"team":{"id":42,"name":"Arsenal"},
+           "fixture":{"id":700},"league":{"id":39,"season":2021}},
+          {"player":{"id":7,"name":"B. Saka","type":"Missing Fixture","reason":"Thigh Injury"},"team":{"id":42,"name":"Arsenal"},
+           "fixture":{"id":700},"league":{"id":39,"season":2021}},
+          {"player":{"id":8,"name":"G. Jesus","type":"Questionable","reason":"Knock"},"team":{"id":42,"name":"Arsenal"},
+           "fixture":{"id":701},"league":{"id":39,"season":2021}}]}
+    """.trimIndent()
+
+    @Test
+    fun `부상 명단을 리그 시즌별로 저장하고 같은 경기 같은 선수는 한 번만 둔다`() {
+        // 5대 리그 중 프리미어리그(39)만 내용이 있고 나머지는 비어 있다
+        listOf(39, 140, 78, 135, 61).forEach { id ->
+            footballApi.expect(requestTo("$base/injuries?league=$id&season=2021"))
+                .andRespond(ok(if (id == 39) injuriesResponse else emptyResponse))
+        }
+
+        mockMvc.post("/api/admin/injuries/load?from=2021&to=2021") { header("Authorization", "Bearer $admin") }
+            .andExpect { status { isOk() } }
+
+        footballApi.verify()
+        assertEquals(2, injuryRepository.count())
+        val saka = injuryRepository.findByFixtureId(700).single()
+        assertEquals("Missing Fixture", saka.type)
+        assertEquals("Thigh Injury", saka.reason)
     }
 
     @Test

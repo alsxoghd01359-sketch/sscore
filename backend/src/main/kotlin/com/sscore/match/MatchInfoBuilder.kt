@@ -16,7 +16,8 @@ data class BuiltMatchInfo(
     val playerStats: List<PlayerStatEntity>,   // 선수별 경기 기록 (평점 포함)
     val events: List<MatchEventEntity>,        // 타임라인
     val finished: Boolean,                     // 외부 API가 경기가 끝났다고 알려 줬는가
-    val referee: String?                       // 외부 API가 알려 준 주심 (없으면 null)
+    val referee: String?,                      // 외부 API가 알려 준 주심 (없으면 null)
+    val teamStats: List<MatchTeamStat> = emptyList()   // 팀별 통계 (승부예측 학습용)
 )
 
 // 외부 API의 경기 상세 응답을 경기 정보(타임라인·통계·평점 상위 선수)로 바꾼다. 저장은 하지 않는다.
@@ -286,6 +287,7 @@ object MatchInfoBuilder {
             awayTopPlayers = awayTop5,
             playerRatings = playerRatings
         )
-        return BuiltMatchInfo(info, playerStatsToSave, eventEntities, finished, fetchedRefereeName)
+        val teamStats = if (details != null) TeamStatParser.parse(fixtureId, match?.homeTeamId, match?.awayTeamId, details) else emptyList()
+        return BuiltMatchInfo(info, playerStatsToSave, eventEntities, finished, fetchedRefereeName, teamStats)
     }
 }

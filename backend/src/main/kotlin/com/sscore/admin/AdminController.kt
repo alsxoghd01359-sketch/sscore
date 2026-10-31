@@ -23,7 +23,8 @@ class AdminController(
     private val bulkInitService: BulkHistoricalInitService,
     private val plHistorySeed: PremierLeagueHistorySeed,
     private val push: PushService,
-    private val backfill: MatchBackfillService
+    private val backfill: MatchBackfillService,
+    private val injuryImport: InjuryImportService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -51,7 +52,7 @@ class AdminController(
      */
     @PostMapping("/matches/backfill")
     fun startBackfill(
-        @RequestParam(defaultValue = "2015") from: Int,
+        @RequestParam(defaultValue = "2019") from: Int,
         @RequestParam(required = false) to: Int?,
         @RequestParam(defaultValue = "2020") detailFrom: Int,
         @RequestParam(defaultValue = "5000") maxCalls: Int,
@@ -60,6 +61,17 @@ class AdminController(
         val last = to ?: seasons.current()
         if (!backfill.start(from, last, detailFrom, maxCalls, delayMs)) return "이미 실행 중입니다. GET /api/admin/matches/backfill/status 로 확인하세요."
         return "$from~$last 시즌 상세 채우기를 시작했습니다 (상세는 $detailFrom 시즌부터, 호출 한도 $maxCalls). 진행 상황은 status 로 확인하세요."
+    }
+
+    /** 부상/결장 명단을 시즌 범위로 받아 저장한다 (20/21 시즌부터 있다). 리그·시즌당 호출 1번. */
+    @PostMapping("/injuries/load")
+    fun loadInjuries(
+        @RequestParam(defaultValue = "2020") from: Int,
+        @RequestParam(required = false) to: Int?
+    ): String {
+        val last = to ?: seasons.current()
+        val saved = injuryImport.load(from, last)
+        return "$from~$last 시즌 부상/결장 명단 ${saved}건을 저장했습니다."
     }
 
     @GetMapping("/matches/backfill/status")
